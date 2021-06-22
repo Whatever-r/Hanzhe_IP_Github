@@ -58,9 +58,9 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 				country -> {
 //					random initial avg tempreature for now
 					country.avgAnnualTemp = getContext().getPrng().discrete(-10, 30).sample();
-					country.GDP = country.initGDP;
+//					country.GDP = country.initGDP;
 					println(country.GDP);
-					country.compGrowth = country.initCompGrowth;
+//					country.compGrowth = Ωcountry.initCompGrowth;
 //					country.avgAnnualTempLast = country.avgAnnualTemp;
 					
 				}
@@ -74,15 +74,15 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 	@Override
 	public void step() {
 		super.step();
-//		run(UN.sendTemp, Country.gdpGrowth, UN.updateGDP);
-		run(Country.gdpGrowth, UN.updateGDP);
+		run(UN.sendTemp, Country.gdpGrowth, UN.updateGDP);
+//		run(Country.gdpGrowth, UN.updateGDP);
 		getGlobals().varTemp += getContext().getPrng().normal(0, 0.01).sample();
 		getDoubleAccumulator("varTempAccu").add(getGlobals().varTemp);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
 	
-	public class Globals extends GlobalState {
+	public static class Globals extends GlobalState {
 		@Variable(name = "Average GlobalTemperature")
 		public double avgTemp = 18;
 		@Variable

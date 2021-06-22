@@ -1,6 +1,6 @@
 package models.Climate0622;
 
-//import static HZ_util.Print.*;
+import static HZ_util.Print.*;
 
 import simudyne.core.abm.AgentBasedModel;
 import simudyne.core.abm.GlobalState;
@@ -17,17 +17,17 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	
 	@Constant
 	String Country;
-	@Constant
-	double initGDP;
-	@Variable(name = "GDP by Country")
+	//	@Constant
+//	double initGDP;
+	@Variable(initializable = true, name = "GDP by Country")
 	double GDP;
-	@Constant // Base Compound Growth in %
-	double initCompGrowth;
-	@Variable(name = "Compound Growth Rate%") // Base Compound Growth in %
-	double compGrowth;
+	//	@Constant // Base Compound Growth in %
+//	double initCompGrowth;
+	@Variable(initializable = true, name = "Compound Growth Rate%") // Base Compound Growth in %
+			double compGrowth;
 	@Variable(name = "Average Annual Temp by Country")
 	double avgAnnualTemp;
-	
+
 //	double avgAnnualTempLast;
 	
 	//impact on growth rate in %
@@ -58,12 +58,12 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	}
 	
 	
-	void gdpGrowth(double varTemp, double avgTempStep){//, double avgTempLast) {
+	void gdpGrowth(double varTemp, double avgTempStep) {//, double avgTempLast) {
 //		double avgTempVar = avgTemp - avgTempLast;
 		double avgTempImpact = -0.001625 * avgTempStep + 0.00875;
-//		avgTempImpact += getPrng().normal(0,0.1 ).sample();
- 		double coeff = 1 + (compGrowth + avgTempImpact);
-//		println(coeff);
+		avgTempImpact += getPrng().normal(0,0.1 ).sample();
+		double coeff = 1 + (compGrowth + avgTempImpact);
+		println(coeff);
 		this.GDP *= coeff;
 	}
 	

@@ -48,14 +48,14 @@ public class UN extends Agent<ClimateModel0622.Globals> {
 		calcGlobalGDP(gdpValueList);
 	}
 	
-	void updateAccumulator() {
-		getDoubleAccumulator("globalGDPAccu").add(this.globalGDP);
-	}
-	
-	private void calcGlobalGDP(List<Messages.gdpValue> gdpValueList) {
+	void calcGlobalGDP(List<Messages.gdpValue> gdpValueList) {
 		this.globalGDP = 0;
 		gdpValueList.forEach(
 				gdpValue -> this.globalGDP += gdpValue.getBody()
 		);
+	}
+	
+	void updateAccumulator() {
+		getDoubleAccumulator("globalGDPAccu").add(this.globalGDP);
 	}
 }
