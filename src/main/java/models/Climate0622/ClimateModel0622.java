@@ -1,10 +1,13 @@
 package models.Climate0622;
 
 import static HZ_util.Print.*;
+
 import org.apache.commons.math3.random.EmpiricalDistribution;
 import simudyne.core.abm.AgentBasedModel;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
+import simudyne.core.abm.stats.AgentStatistics;
+import simudyne.core.abm.stats.AgentStatisticsResult;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
@@ -71,9 +74,19 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		
 	}
 	
+//	public AgentStatistics<Country> countryAgentStatistics = stats(Country.class);
+//	public AgentSt
+	
 	@Override
+	
 	public void step() {
 		super.step();
+//		if (getContext().getTick() == 0) {
+//			AgentStatistics<Country> countryAgentStatistics = stats(Country.class);
+//			countryAgentStatistics.field("Sum", country -> country.GDP);
+//			AgentStatisticsResult<Country> countryAgentStatisticsResult = countryAgentStatistics.get();
+//			getDoubleAccumulator("globalGDPAccu").add(countryAgentStatisticsResult.getField("Sum").getSum());
+//		}
 		run(UN.sendTemp, Country.gdpGrowth, UN.updateGDP);
 //		run(Country.gdpGrowth, UN.updateGDP);
 		getGlobals().varTemp += getContext().getPrng().normal(0, 0.01).sample();
@@ -82,10 +95,10 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
 	
-	public static class Globals extends GlobalState {
-		@Variable(name = "Average GlobalTemperature")
+	public static final class Globals extends GlobalState {
+		@Variable(name = "Average Global Temperature")
 		public double avgTemp = 18;
-		@Variable
+		@Variable(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
