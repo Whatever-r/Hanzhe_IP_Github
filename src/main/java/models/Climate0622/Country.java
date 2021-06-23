@@ -19,7 +19,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	@Variable(initializable = true, name = "Compound Growth Rate%") // Base Compound Growth in %
 	double compGrowth;
 	
-	@Variable(name = "Average Annual Temp by Country")
+	@Variable(initializable = true, name = "Average Annual Temp by Country")
 	double avgAnnuTemp;
 	
 	//impact on growth rate in %
