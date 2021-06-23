@@ -1,17 +1,14 @@
 package models.Climate0622;
 
-import static HZ_util.Print.*;
-
-import org.apache.commons.math3.random.EmpiricalDistribution;
 import simudyne.core.abm.AgentBasedModel;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
-import simudyne.core.abm.stats.AgentStatistics;
-import simudyne.core.abm.stats.AgentStatisticsResult;
 import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
 import simudyne.core.data.CSVSource;
+
+import static HZ_util.Print.println;
 
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
@@ -60,12 +57,13 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
 //					random initial avg tempreature for now
-					country.avgAnnualTemp = getContext().getPrng().discrete(-10, 30).sample();
+//					country.avgAnnuTemp = getContext().getPrng().discrete(-10, 30).sample();
 //					country.GDP = country.initGDP;
+					println(country.Country);
 					println(country.GDP);
+					println(country.avgAnnuTemp);
 //					country.compGrowth = Ωcountry.initCompGrowth;
 //					country.avgAnnualTempLast = country.avgAnnualTemp;
-					
 				}
 		);
 		unGroup.fullyConnected(countryGroup, Links.ecoLink.class);
@@ -73,7 +71,7 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		super.setup();
 		
 	}
-	
+
 //	public AgentStatistics<Country> countryAgentStatistics = stats(Country.class);
 //	public AgentSt
 	

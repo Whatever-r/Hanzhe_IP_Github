@@ -20,7 +20,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	double compGrowth;
 	
 	@Variable(name = "Average Annual Temp by Country")
-	double avgAnnualTemp;
+	double avgAnnuTemp;
 	
 	//impact on growth rate in %
 	@Variable(name = "impact of D2D Temp. Var. By Country")
@@ -37,7 +37,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 			action(
 					country -> {
 						country.climateImpactedGrowth();
-						country.avgAnnualTemp += country.getGlobals().avgTempStep;
+						country.avgAnnuTemp += country.getGlobals().avgTempStep;
 //						country.sendGDP;
 						country.sendGDPToUN();
 //						country.getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, country.GDP);
