@@ -30,17 +30,15 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 		return Action.create(Country.class, consumer);
 	}
 	
-	static Action<Country> sendGDP =
-			action(country -> country.getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, country.GDP));
+//	static Action<Country> sendGDP =
+//			action(country -> country.getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, country.GDP));
 	
 	static Action<Country> gdpGrowth =
 			action(
 					country -> {
 						country.climateImpactedGrowth();
 						country.avgAnnuTemp += country.getGlobals().avgTempStep;
-//						country.sendGDP;
 						country.sendGDPToUN();
-//						country.getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, country.GDP);
 					}
 			);
 	
@@ -49,13 +47,14 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	}
 	
 	void climateImpactedGrowth() {
-		if (hasMessageOfType(Messages.temperature.class)) {
+//		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
-			double varTemp = getMessagesOfType(Messages.temperature.class).get(0).varTemp;
+//			double varTemp = getMessagesOfType(Messages.temperature.class).get(0).varTemp;
+			double varTemp = getGlobals().varTemp;
 			gdpGrowth(varTemp, getGlobals().avgTempStep);//, avgAnnualTempLast);
 //			avgAnnualTempLast = avgAnnualTemp;
-		}
+//		}
 	}
 	
 	

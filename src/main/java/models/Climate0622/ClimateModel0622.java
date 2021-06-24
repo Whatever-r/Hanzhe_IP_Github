@@ -37,23 +37,12 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 	
 	@Override
 	public void setup() {
-//		getDoubleAccumulator("avgTemp").add(18);
-//		getDoubleAccumulator("varTemp").add(1.8);
-//		SeededRandom prng = getContext().getPrng();
-//		prng.generator.;
 //		EmpiricalDistribution initGDP = getContext().getPrng().empiricalFromSource(new CSVSource("data/gdp-distribution.csv"));
-		
 		CSVSource CountryInitial = new CSVSource("data/GDP_by_Country_0622.csv");
 		
 		Group<UN> unGroup = generateGroup(UN.class, nbUN, un -> un.globalGDP = 0);
-//		Group<Country> economyGroup = generateGroup(Country.class, nbEconomy,
-//				eco -> {
-//					eco.gdpValue = initGDP.sample();
-////					base growth rate in % per month
-//					eco.baseGrowth = (5 + getContext().getPrng().normal(0, 1).sample()) / 100.0 / 12;
-////					impact of varTemp on the base growth rate in %
-//					eco.impactOfD2DVariOnGrowth = (7.5 + getContext().getPrng().normal(0, 1).sample()) / 100.0;
-//				});
+
+//		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
 //					random initial avg tempreature for now
@@ -71,12 +60,8 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		super.setup();
 		
 	}
-
-//	public AgentStatistics<Country> countryAgentStatistics = stats(Country.class);
-//	public AgentSt
 	
 	@Override
-	
 	public void step() {
 		super.step();
 //		if (getContext().getTick() == 0) {
@@ -85,8 +70,10 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 //			AgentStatisticsResult<Country> countryAgentStatisticsResult = countryAgentStatistics.get();
 //			getDoubleAccumulator("globalGDPAccu").add(countryAgentStatisticsResult.getField("Sum").getSum());
 //		}
-		run(UN.sendTemp, Country.gdpGrowth, UN.updateGDP);
-//		run(Country.gdpGrowth, UN.updateGDP);
+//		Within each step, Country receives Temoerature data,
+//		Produce GDP growth incl. the temperature impact
+//		run(UN.sendTemp, Country.gdpGrowth, UN.updateGDP);
+		run(Country.gdpGrowth, UN.updateGDP);
 		getGlobals().varTemp += getContext().getPrng().normal(0, 0.01).sample();
 		getDoubleAccumulator("varTempAccu").add(getGlobals().varTemp);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
