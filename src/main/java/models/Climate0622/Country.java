@@ -50,10 +50,8 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 //		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
-//			double varTemp = getMessagesOfType(Messages.temperature.class).get(0).varTemp;
 			double varTemp = getGlobals().varTemp;
 			gdpGrowth(varTemp, getGlobals().avgTempStep);//, avgAnnualTempLast);
-//			avgAnnualTempLast = avgAnnualTemp;
 //		}
 	}
 	
