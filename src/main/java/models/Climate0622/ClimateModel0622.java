@@ -48,9 +48,8 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 //					random initial avg tempreature for now
 //					country.avgAnnuTemp = getContext().getPrng().discrete(-10, 30).sample();
 //					country.GDP = country.initGDP;
-					println(country.name);
-					println(country.GDP);
-					println(country.avgAnnuTemp);
+					println(country.code + "\t" + country.GDP);
+					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
 //					country.compGrowth = Ωcountry.initCompGrowth;
 //					country.avgAnnualTempLast = country.avgAnnualTemp;
 				}

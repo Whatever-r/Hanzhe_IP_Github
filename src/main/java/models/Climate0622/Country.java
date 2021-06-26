@@ -24,7 +24,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	@Variable(initializable = true, name = "Average Annual Temp by Country")
 	double avgAnnuTemp;
 	
-	@Variable(initializable = true, name = "Ratio of Local Temp Growth to Global Avg.")
+	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")
 	double tempStepRatio;
 	
 	//impact on growth rate in %
@@ -42,7 +42,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 			action(
 					country -> {
 						country.climateImpactedGrowth();
-						country.avgAnnuTemp += country.getGlobals().avgTempStep;
+						country.updateAvgTemp();
 						country.sendGDPToUN();
 					}
 			);
@@ -51,19 +51,24 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 		getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, GDP);
 	}
 	
+	void updateAvgTemp() {
+		avgAnnuTemp += getGlobals().avgTempStep * tempStepRatio;
+	}
+	
 	void climateImpactedGrowth() {
 //		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
 		double varTemp = getGlobals().varTemp;
-		gdpGrowth(varTemp, getGlobals().avgTempStep * tempStepRatio);//, avgAnnualTempLast);
-//		}
+		gdpGrowth(varTemp, getGlobals().avgTempStep * tempStepRatio);
 	}
 	
 	
-	void gdpGrowth(double varTemp, double avgTempStep) {//, double avgTempLast) {
+	void gdpGrowth(double varTemp, double localTempStep) {//, double avgTempLast) {
 //		double avgTempVar = avgTemp - avgTempLast;
-		double avgTempImpact = -0.001625 * avgTempStep + 0.00875;
+
+//		Marginal Warming impact w.r.t to local annual average temperature
+		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
 		double coeff = 1 + (compGrowth + avgTempImpact);
 		println(coeff);
