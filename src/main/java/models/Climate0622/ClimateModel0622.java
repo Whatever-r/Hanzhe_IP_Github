@@ -38,7 +38,7 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 	@Override
 	public void setup() {
 //		EmpiricalDistribution initGDP = getContext().getPrng().empiricalFromSource(new CSVSource("data/gdp-distribution.csv"));
-		CSVSource CountryInitial = new CSVSource("data/GDP_by_Country_0622.csv");
+		CSVSource CountryInitial = new CSVSource("data/countryInit.csv");
 		
 		Group<UN> unGroup = generateGroup(UN.class, nbUN, un -> un.globalGDP = 0);
 
@@ -48,7 +48,7 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 //					random initial avg tempreature for now
 //					country.avgAnnuTemp = getContext().getPrng().discrete(-10, 30).sample();
 //					country.GDP = country.initGDP;
-					println(country.Country);
+					println(country.name);
 					println(country.GDP);
 					println(country.avgAnnuTemp);
 //					country.compGrowth = Ωcountry.initCompGrowth;
@@ -82,7 +82,7 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 	
 	public static final class Globals extends GlobalState {
 		@Variable(name = "Average Global Temperature")
-		public double avgTemp = 18;
+		public double avgTemp = 15.64;
 		@Variable(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
 		@Variable(name = "D2D Variation of Temperature")

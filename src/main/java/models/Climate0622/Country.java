@@ -10,8 +10,10 @@ import static HZ_util.Print.println;
 
 public class Country extends Agent<ClimateModel0622.Globals> {
 	
+	@Constant(name = "C/R Code")
+	String code;
 	@Constant(name = "Name of Country/Region")
-	String Country;
+	String name;
 	
 	@Variable(initializable = true, name = "GDP by Country")
 	double GDP;
@@ -22,6 +24,9 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	@Variable(initializable = true, name = "Average Annual Temp by Country")
 	double avgAnnuTemp;
 	
+	@Variable(initializable = true, name = "Ratio of Local Temp Growth to Global Avg.")
+	double tempStepRatio;
+	
 	//impact on growth rate in %
 	@Variable(name = "impact of D2D Temp. Var. By Country")
 	public double impactOfD2DVariOnGrowth;
@@ -29,7 +34,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
 	}
-	
+
 //	static Action<Country> sendGDP =
 //			action(country -> country.getLinks(Links.ecoLink.class).send(Messages.gdpValue.class, country.GDP));
 	
@@ -50,8 +55,8 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 //		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
-			double varTemp = getGlobals().varTemp;
-			gdpGrowth(varTemp, getGlobals().avgTempStep);//, avgAnnualTempLast);
+		double varTemp = getGlobals().varTemp;
+		gdpGrowth(varTemp, getGlobals().avgTempStep * tempStepRatio);//, avgAnnualTempLast);
 //		}
 	}
 	
@@ -59,7 +64,7 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 	void gdpGrowth(double varTemp, double avgTempStep) {//, double avgTempLast) {
 //		double avgTempVar = avgTemp - avgTempLast;
 		double avgTempImpact = -0.001625 * avgTempStep + 0.00875;
-		avgTempImpact += getPrng().normal(0, 0.1).sample();
+		avgTempImpact += getPrng().normal(0, 0.01).sample();
 		double coeff = 1 + (compGrowth + avgTempImpact);
 		println(coeff);
 		this.GDP *= coeff;
