@@ -60,13 +60,11 @@ public class Country extends Agent<ClimateModel0622.Globals> {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
 		double varTemp = getGlobals().varTemp;
-		gdpGrowth(varTemp, getGlobals().avgTempStep * tempStepRatio);
+		gdpGrowth(getGlobals().avgTempStep * tempStepRatio);
 	}
 	
 	
-	void gdpGrowth(double varTemp, double localTempStep) {//, double avgTempLast) {
-//		double avgTempVar = avgTemp - avgTempLast;
-
+	void gdpGrowth(double localTempStep) {//, double avgTempLast) {
 //		Marginal Warming impact w.r.t to local annual average temperature
 		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
