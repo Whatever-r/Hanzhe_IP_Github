@@ -18,8 +18,6 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 	@Constant
 	public int nbUN = 1;
 	
-	public double avgTempStepCst;
-	
 	public static final class Globals extends GlobalState {
 		@Variable(name = "Average Global Temperature")
 		public double avgTemp = 15.64;
@@ -65,7 +63,7 @@ public class ClimateModel0622 extends AgentBasedModel<ClimateModel0622.Globals> 
 		super.step();
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
-		run(Country.gdpGrowth, UN.updateGDP);
+		run(Country.gdpGrowth, UN.updateStat);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}

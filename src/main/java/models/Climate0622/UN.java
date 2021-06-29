@@ -12,7 +12,7 @@ public class UN extends Agent<ClimateModel0622.Globals> {
 					UN::sendTempInfo
 			);
 	
-	static Action<UN> updateGDP =
+	static Action<UN> updateStat =
 			action(
 					un -> {
 						un.updateGlobalGDP();
