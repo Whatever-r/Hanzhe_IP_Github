@@ -2,7 +2,6 @@ package models.Climate0622;
 
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
-import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
 import java.util.List;
@@ -17,13 +16,15 @@ public class UN extends Agent<ClimateModel0622.Globals> {
 			action(
 					un -> {
 						un.updateGlobalGDP();
+						un.updateGlobalGHG();
 						un.updateAccumulator();
 					}
 			);
 	
-//	@Variable public double maxAvgTempRise = 1.5;
-	@Variable
-	public double globalGDP;
+	//	@Variable public double maxAvgTempRise = 1.5;
+//	@Variable
+	public double globalGDP = 0;
+	public double globalGHG = 0;
 	
 	private static Action<UN> action(SerializableConsumer<UN> consumer) {
 		return Action.create(UN.class, consumer);
@@ -55,7 +56,21 @@ public class UN extends Agent<ClimateModel0622.Globals> {
 		);
 	}
 	
+	void updateGlobalGHG() {
+		List<Messages.ghgEmission> ghgEmissionList = getMessagesOfType(Messages.ghgEmission.class);
+		calcGlobalGHG(ghgEmissionList);
+	}
+	
+	void calcGlobalGHG(List<Messages.ghgEmission> ghgEmissionList) {
+		this.globalGHG = 0;
+		ghgEmissionList.forEach(
+				ghgEmission -> this.globalGHG += ghgEmission.getBody()
+		);
+	}
+	
+	
 	void updateAccumulator() {
 		getDoubleAccumulator("globalGDPAccu").add(this.globalGDP);
+		getDoubleAccumulator("globalGHGAccu").add(this.globalGHG);
 	}
 }
