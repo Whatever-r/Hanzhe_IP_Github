@@ -6,6 +6,9 @@ import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
+import java.util.List;
+import java.util.concurrent.atomic.AtomicReference;
+
 import static HZ_util.Print.println;
 
 public class Country extends Agent<ClimateGDPGHG.Globals> {
@@ -44,7 +47,6 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
 	}
-	
 	
 	static Action<Country> sendGroup =
 			action(Country::sendGroupInfo);
@@ -85,6 +87,7 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 					}
 			);
 	
+	
 	void sendGDPToUN() {
 		getLinks(Links.UNLink.class).send(Messages.gdpValue.class, GDP);
 	}
@@ -97,7 +100,6 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 		avgAnnuTemp += getGlobals().avgTempStep * tempStepRatio;
 	}
 	
-	
 	void climateImpactedGrowth() {
 //		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
@@ -106,17 +108,49 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 		gdpGrowth(getGlobals().avgTempStep * tempStepRatio);
 	}
 	
-	void gdpGrowth(double localTempStep) {//, double avgTempLast) {
+	void gdpGrowth(double localTempStep) {
 //		Marginal Warming impact w.r.t to local annual average temperature
 		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
 		double coeff = 1 + (compGrowth + avgTempImpact);
-//		double coeff = (1 + (compGrowth  + avgTempImpact)) * Math.pow(1-getGlobals().decay, getContext().getTick());
-//		double coeff = (1 + (compGrowth  + avgTempImpact)) * (Math.log10(getContext().getTick()+10);
 		println(coeff);
 		this.GDP *= coeff;
 	}
+	
+	static Action<Country> shareTech = action(Country::shareTech);
+	static Action<Country> improveTech = action(Country::improveUnitGHG);
+	
+	void improveUnitGHG() {
+		if (hasMessageOfType(Messages.unitGHG.class)) {
+			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
+			AtomicReference<Double> techImport = new AtomicReference<>(unitGHG);
+			AtomicReference<Double> tempDiff = new AtomicReference<>(unitGHG);
+			list.forEach(msg -> {
+				double msgVal = msg.getBody();
+				double temp = unitGHG - msgVal;
+				if (temp >= 0 && temp < tempDiff.get()) {
+					tempDiff.set(temp);
+					techImport.set(msgVal);
+				}
+			});
+			unitGHG = techImport.get();
+		}
+	}
+	
+	void shareTech() {
+		unitGHG *= getGlobals().techImprove;
+		
+		if (getGlobals().unitGHGShare == 1)
+			getLinks(Links.G7Link.class).send(Messages.unitGHG.class, unitGHG);
+		if (getGlobals().unitGHGShare == 2)
+			getLinks(Links.G20Link.class).send(Messages.unitGHG.class, unitGHG);
+		if (getGlobals().unitGHGShare == 3)
+			getLinks(Links.InterLink.class).send(Messages.unitGHG.class, unitGHG);
+	}
+	
 }
+
+
 
 
 

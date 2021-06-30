@@ -23,7 +23,11 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
-//		@Constant(name = "growth decay coeff.")
+		@Constant(name = "Tech Improve")
+		public double techImprove = 1;
+		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
+		public int unitGHGShare = 0;
+		//		@Constant(name = "growth decay coeff.")
 //		public double decay = 0.001;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
@@ -78,6 +82,7 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
 		run(Country.gdpGrowth, UN.updateStat);
+		run(Country.shareTech, Country.improveTech);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
