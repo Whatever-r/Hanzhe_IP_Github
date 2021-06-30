@@ -18,6 +18,16 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 	@Constant
 	public int nbUN = 1;
 	
+	public static final class Globals extends GlobalState {
+		@Variable(name = "Average Global Temperature")
+		public double avgTemp = 15.64;
+		@Constant(name = "Average Global Warming Step")
+		public double avgTempStep = 0.1;
+		@Constant(name = "growth decay coeff.")
+		public double decay = 0.001;
+		@Variable(name = "D2D Variation of Temperature")
+		public double varTemp = 1.5;
+	}
 	
 	@Override
 	public void init() {
@@ -29,7 +39,13 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		
 		registerAgentTypes(Country.class, UN.class);
-		registerLinkTypes(Links.ecoLink.class);
+		registerLinkTypes(Links.UNLink.class,
+				Links.InterLink.class,
+				Links.G7Link.class,
+				Links.G20Link.class,
+				Links.OECDLink.class
+		);
+		
 	}
 	
 	@Override
@@ -44,8 +60,11 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
 				}
 		);
-		unGroup.fullyConnected(countryGroup, Links.ecoLink.class);
-		countryGroup.fullyConnected(unGroup, Links.ecoLink.class);
+		unGroup.fullyConnected(countryGroup, Links.UNLink.class);
+		countryGroup.fullyConnected(countryGroup, Links.InterLink.class);
+		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);
+		countryGroup.fullyConnected(countryGroup, Links.G20Link.class);
+		countryGroup.fullyConnected(countryGroup, Links.OECDLink.class);
 		super.setup();
 		
 	}
@@ -53,6 +72,9 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 	@Override
 	public void step() {
 		super.step();
+		if (getContext().getTick() == 0) {
+			run(Country.sendGroup, Country.pruneLink);
+		}
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
 		run(Country.gdpGrowth, UN.updateStat);
@@ -60,12 +82,5 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
 	
-	public static final class Globals extends GlobalState {
-		@Variable(name = "Average Global Temperature")
-		public double avgTemp = 15.64;
-		@Constant(name = "Average Global Warming Step")
-		public double avgTempStep = 0.1;
-		@Variable(name = "D2D Variation of Temperature")
-		public double varTemp = 1.5;
-	}
+	
 }

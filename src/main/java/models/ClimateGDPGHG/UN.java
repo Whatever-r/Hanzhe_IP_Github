@@ -35,7 +35,7 @@ public class UN extends Agent<ClimateGDPGHG.Globals> {
 //		double avgTemp = getDoubleAccumulator("avgTemp").value();
 		double varTemp = getGlobals().varTemp;
 //		double varTemp = getDoubleAccumulator("varTemp").value();
-		getLinks(Links.ecoLink.class)
+		getLinks(Links.UNLink.class)
 				.send(
 						Messages.temperature.class,
 						(m, l) -> {
