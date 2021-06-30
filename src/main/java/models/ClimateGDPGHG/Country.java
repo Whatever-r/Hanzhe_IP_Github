@@ -116,8 +116,6 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 		println(coeff);
 		this.GDP *= coeff;
 	}
-	
-	
 }
 
 

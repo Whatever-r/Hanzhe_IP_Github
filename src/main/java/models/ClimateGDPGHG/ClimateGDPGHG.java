@@ -23,8 +23,8 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
-		@Constant(name = "growth decay coeff.")
-		public double decay = 0.001;
+//		@Constant(name = "growth decay coeff.")
+//		public double decay = 0.001;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
 	}
@@ -60,7 +60,7 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
 				}
 		);
-		unGroup.fullyConnected(countryGroup, Links.UNLink.class);
+		countryGroup.partitionConnected(unGroup, Links.UNLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.InterLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);
 		countryGroup.fullyConnected(countryGroup, Links.G20Link.class);
