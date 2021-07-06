@@ -42,8 +42,8 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 	double tempStepRatio;
 	
 	//impact on growth rate in %
-	@Variable(name = "impact of D2D Temp. Var. By Country")
-	public double impactOfD2DVariOnGrowth;
+//	@Variable(name = "impact of D2D Temp. Var. By Country")
+//	public double impactOfD2DVariOnGrowth;
 	
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
@@ -105,7 +105,7 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 //		if (hasMessageOfType(Messages.temperature.class)) {
 //			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
 //			avgTemp = getGlobals().avgTemp;
-		double varTemp = getGlobals().varTemp;
+//		double varTemp = getGlobals().varTemp;
 		gdpGrowth(getGlobals().avgTempStep * tempStepRatio);
 	}
 	

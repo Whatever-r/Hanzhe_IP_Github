@@ -12,7 +12,7 @@ import static HZ_util.Print.println;
 
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
-@ModelSettings(macroStep = 1L, start = "2020-06-01 T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
+@ModelSettings(macroStep = 1L, start = "2020-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
 public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 	
 	@Constant
