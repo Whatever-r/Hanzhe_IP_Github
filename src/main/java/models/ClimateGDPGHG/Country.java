@@ -6,8 +6,9 @@ import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicReference;
 
 import static HZ_util.Print.println;
 
@@ -120,20 +121,35 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 	static Action<Country> shareTech = action(Country::shareTech);
 	static Action<Country> improveTech = action(Country::improveUnitGHG);
 	
+	
 	void improveUnitGHG() {
 		if (hasMessageOfType(Messages.unitGHG.class)) {
 			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
-			AtomicReference<Double> techImport = new AtomicReference<>(unitGHG);
-			AtomicReference<Double> tempDiff = new AtomicReference<>(unitGHG);
+//			AtomicReference<Double> techImport = new AtomicReference<>(unitGHG);
+//			AtomicReference<Double> tempDiff = new AtomicReference<>(unitGHG);
+//			list.forEach(msg -> {
+//				double msgVal = msg.getBody();
+//				double temp = unitGHG - msgVal;
+//				if (temp >= 0 && temp < tempDiff.get()) {
+//					tempDiff.set(temp);
+//					techImport.set(msgVal);
+//				}
+//			});
+//			unitGHG = techImport.get();
+			List<Double> doubles = new ArrayList<>();
 			list.forEach(msg -> {
-				double msgVal = msg.getBody();
-				double temp = unitGHG - msgVal;
-				if (temp >= 0 && temp < tempDiff.get()) {
-					tempDiff.set(temp);
-					techImport.set(msgVal);
-				}
+				doubles.add(msg.getBody());
 			});
-			unitGHG = techImport.get();
+			
+			Collections.sort(doubles);
+			if (doubles.get(0) >= unitGHG) return;
+			
+			for (int i = 1; i < doubles.size(); i++) {
+				if (doubles.get(i) >= unitGHG && doubles.get(i - 1) < unitGHG) {
+					unitGHG = doubles.get(i - 1);
+					return;
+				}
+			}
 		}
 	}
 	

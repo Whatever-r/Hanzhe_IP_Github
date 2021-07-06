@@ -12,7 +12,7 @@ import static HZ_util.Print.println;
 
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
-@ModelSettings(macroStep = 1L, start = "2021-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
+@ModelSettings(macroStep = 1L, start = "2020-06-01 T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
 public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 	
 	@Constant
@@ -39,8 +39,11 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 //	createDoubleAccumulator("avgTemp", "Average Temperature");
 //		createDoubleAccumulator("varTempAccu", "Variation of Temperature");
 		createDoubleAccumulator("avgGlobalTempAccu", "Average Global Temperature");
+		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
+		getDoubleAccumulator("globalGDPAccu").add(Double.NaN);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
+		getDoubleAccumulator("globalGHGAccu").add(Double.NaN);
 		
 		registerAgentTypes(Country.class, UN.class);
 		registerLinkTypes(Links.UNLink.class,
