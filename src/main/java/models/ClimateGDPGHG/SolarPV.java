@@ -5,6 +5,8 @@ import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Variable;
 import simudyne.core.functions.SerializableConsumer;
 
+import static HZ_util.Print.println;
+
 public class SolarPV extends Agent<ClimateGDPGHG.Globals> {
 	private static Action<SolarPV> action(SerializableConsumer<SolarPV> s) {
 		return Action.create(SolarPV.class, s);
@@ -26,11 +28,12 @@ public class SolarPV extends Agent<ClimateGDPGHG.Globals> {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / 44;
 		double corre = 1 + theta * theta;
-
 		double avg = Math.log(solarPrice2019) + tau * expChangeRate;
 		double stdevSquare = Ksquare * Astar / corre;
-
-		double exp = getPrng().normal(avg, stdevSquare).sample();
+		
+		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+		println(exp);
 		solarPrice = Math.exp(exp);
 		getDoubleAccumulator("SolarPrice").add(solarPrice);
 	}

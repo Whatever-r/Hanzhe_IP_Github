@@ -12,7 +12,7 @@ import static HZ_util.Print.println;
 
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
-@ModelSettings(macroStep = 1L, start = "2020-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
+@ModelSettings(macroStep = 1L, start = "2019-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
 public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 	
 	@Constant
@@ -66,10 +66,12 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-					println(country.code + "\t" + country.GDP);
-					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
+//					println(country.code + "\t" + country.GDP);
+//					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
 				}
 		);
+		Group<SolarPV> solarPVGroup = generateGroup(SolarPV.class, 1);
+		
 		countryGroup.partitionConnected(unGroup, Links.UNLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.InterLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);

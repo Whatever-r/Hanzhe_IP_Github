@@ -114,7 +114,7 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
 		double coeff = 1 + (compGrowth + avgTempImpact);
-		println(coeff);
+//		println(coeff);
 		this.GDP *= coeff;
 	}
 	
