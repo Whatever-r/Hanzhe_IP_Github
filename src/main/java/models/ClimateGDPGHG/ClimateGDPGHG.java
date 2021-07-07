@@ -45,7 +45,10 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(Double.NaN);
 		
-		registerAgentTypes(Country.class, UN.class);
+		createDoubleAccumulator("SolarPrice", "Solar Price W/US$2019");
+		getDoubleAccumulator("SolarPrice").add(0.37725);
+		
+		registerAgentTypes(Country.class, UN.class, SolarPV.class);
 		registerLinkTypes(Links.UNLink.class,
 				Links.InterLink.class,
 				Links.G7Link.class,
@@ -86,6 +89,7 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 //		Produce GDP growth incl. the temperature impact
 		run(Country.gdpGrowth, UN.updateStat);
 		run(Country.shareTech, Country.improveTech);
+		run(SolarPV.updatePrice);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
