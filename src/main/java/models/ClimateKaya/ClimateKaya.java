@@ -15,7 +15,6 @@ import java.io.FileReader;
 import java.util.HashMap;
 
 
-
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
 @ModelSettings(macroStep = 1L, start = "2019-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 60L)
@@ -35,11 +34,10 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public int unitGHGShare = 0;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
-		
-		public HashMap<String, HashMap<Integer, Integer>> populationHash = null;
+		//Polulation Projection HashMap
+		public HashMap<String, HashMap<Double, Double>> populationHash = null;
 	}
 	
-	/**Read Population CSV*/
 	
 	@Override
 	public void init() {
@@ -72,8 +70,8 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-					 println(getGlobals().populationHash.get(country.code)+
-							 "\t"+getGlobals().populationHash.get(country.code).get(0));
+//					 println(getGlobals().populationHash.get(country.code)+
+//							 "\t"+getGlobals().populationHash.get(country.code).get(0));
 				}
 		);
 		Group<SolarPV> solarPVGroup = generateGroup(SolarPV.class, 1);
@@ -84,7 +82,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		countryGroup.fullyConnected(countryGroup, Links.G20Link.class);
 		countryGroup.fullyConnected(countryGroup, Links.OECDLink.class);
 		super.setup();
-		
 	}
 	
 	@Override
@@ -105,18 +102,18 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	/**
 	 * Helper, Read Population Projection by Country into Hashmap<code, Hashmap<year, value>>
 	 */
-	public static HashMap<String, HashMap<Integer, Integer>> getPolulationList(String path) {
-		HashMap<String, HashMap<Integer, Integer>> retHashMap = new HashMap<>();
+	public static HashMap<String, HashMap<Double, Double>> getPolulationList(String path) {
+		HashMap<String, HashMap<Double, Double>> retHashMap = new HashMap<>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(path));
 			String[] headtilte = reader.readLine().
 					split(",");// header line
 			String line;
 			while ((line = reader.readLine()) != null) {
-				HashMap<Integer, Integer> itemMap = new HashMap<>();
+				HashMap<Double, Double> itemMap = new HashMap<>();
 				String[] itemArray = line.split(",");
 				for (int i = 1; i < itemArray.length; i++) {
-					itemMap.put(Integer.parseInt(headtilte[i]), Integer.parseInt(itemArray[i]));
+					itemMap.put(Double.parseDouble(headtilte[i]), Double.parseDouble(itemArray[i]));
 				}
 				retHashMap.put(itemArray[0], itemMap);
 			}

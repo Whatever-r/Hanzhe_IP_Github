@@ -32,7 +32,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	@Variable(initializable = true, name = "GDP by Country USD")
 	double gdp;
 	@Variable(initializable = true, name = "Population")
-	long population;
+	double population;
 	/**
 	 * GDP per Capita parameters
 	 */
@@ -104,7 +104,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	static Action<Country> gdpGrowth =
 			action(
 					country -> {
-						country.climateImpactedGdpGrowth();
+//						country.climateImpactedGdpGrowth();
+						country.KayaGdp();
 						country.sendGDPToUN();
 						country.sendGHGToUN(country.calcEmission());
 						country.updateAvgTemp();
@@ -123,6 +124,18 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		avgAnnuTemp += getGlobals().avgTempStep * tempStepRatio;
 	}
 	
+	void KayaGdp() {
+		/**GDP per Capita * Population projection*/
+		double year = getContext().getTick();
+		population = getGlobals().populationHash.get(code).get(year);
+		/**Marginal Warming impact w.r.t to local annual average temperature*/
+		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
+		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
+		avgTempImpact += getPrng().normal(0, 0.01).sample();
+		
+		this.gdp = getGdpPerCapita() * population * (1 - avgTempImpact);
+	}
+	
 	void climateImpactedGdpGrowth() {
 		/**Marginal Warming impact w.r.t to local annual average temperature*/
 		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
@@ -135,6 +148,17 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double calcEmission() {
 		double energyTWh = gdp * getEnergyPerGdp() / Math.pow(10, 9);
 		return energyTWh * getEmisPerEnergy();
+	}
+	
+	double getGdpPerCapita() {
+		double tau = getContext().getTick();
+		double Astar = tau + (tau * tau) / gdpPerCapitaCount;
+		double avg = Math.log(gdpPerCapita) / Math.log(2) + tau * gdpPerCapitaMu;
+		double stdevSquare = gdpPerCapitaK2 * Astar;
+		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+//		println(exp);
+		return Math.pow(2, exp);
 	}
 	
 	double getEnergyPerGdp() {
