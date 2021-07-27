@@ -1,5 +1,7 @@
 package models.ClimateKaya;
 
+import static HZ_util.Print.println;
+
 import simudyne.core.abm.AgentBasedModel;
 import simudyne.core.abm.GlobalState;
 import simudyne.core.abm.Group;
@@ -7,6 +9,12 @@ import simudyne.core.annotations.Constant;
 import simudyne.core.annotations.ModelSettings;
 import simudyne.core.annotations.Variable;
 import simudyne.core.data.CSVSource;
+
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.util.HashMap;
+
+
 
 //each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
@@ -25,18 +33,16 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public double techImprove = 1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
 		public int unitGHGShare = 0;
-		//@Constant(name = "growth decay coeff.")
-//public double decay = 0.001;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
+		
+		public HashMap<String, HashMap<Integer, Integer>> populationHash = null;
 	}
 	
 	/**Read Population CSV*/
 	
 	@Override
 	public void init() {
-//	createDoubleAccumulator("avgTemp", "Average Temperature");
-//		createDoubleAccumulator("varTempAccu", "Variation of Temperature");
 		createDoubleAccumulator("avgGlobalTempAccu", "Average Global Temperature");
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
@@ -61,12 +67,13 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	public void setup() {
 //		EmpiricalDistribution initGDP = getContext().getPrng().empiricalFromSource(new CSVSource("data/gdp-distribution.csv"));
 		CSVSource CountryInitial = new CSVSource("data/Kaya Metric.csv");
+		getGlobals().populationHash = getPolulationList("data/projected-population-by-country.csv");
 		Group<UN> unGroup = generateGroup(UN.class, nbUN, un -> un.globalGDP = 0);
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-//					println(country.code + "\t" + country.GDP);
-//					println(country.avgAnnuTemp + "\t" + country.tempStepRatio);
+					 println(getGlobals().populationHash.get(country.code)+
+							 "\t"+getGlobals().populationHash.get(country.code).get(0));
 				}
 		);
 		Group<SolarPV> solarPVGroup = generateGroup(SolarPV.class, 1);
@@ -95,5 +102,28 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
 	
+	/**
+	 * Helper, Read Population Projection by Country into Hashmap<code, Hashmap<year, value>>
+	 */
+	public static HashMap<String, HashMap<Integer, Integer>> getPolulationList(String path) {
+		HashMap<String, HashMap<Integer, Integer>> retHashMap = new HashMap<>();
+		try {
+			BufferedReader reader = new BufferedReader(new FileReader(path));
+			String[] headtilte = reader.readLine().
+					split(",");// header line
+			String line;
+			while ((line = reader.readLine()) != null) {
+				HashMap<Integer, Integer> itemMap = new HashMap<>();
+				String[] itemArray = line.split(",");
+				for (int i = 1; i < itemArray.length; i++) {
+					itemMap.put(Integer.parseInt(headtilte[i]), Integer.parseInt(itemArray[i]));
+				}
+				retHashMap.put(itemArray[0], itemMap);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+		return retHashMap;
+	}
 	
 }
