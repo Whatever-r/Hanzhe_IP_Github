@@ -1,4 +1,4 @@
-package models.ClimateGDPGHG;
+package models.ClimateKaya;
 
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
@@ -7,12 +7,12 @@ import simudyne.core.functions.SerializableConsumer;
 
 import static HZ_util.Print.println;
 
-public class SolarPV extends Agent<ClimateGDPGHG.Globals> {
+public class SolarPV extends Agent<ClimateKaya.Globals> {
 	private static Action<SolarPV> action(SerializableConsumer<SolarPV> s) {
 		return Action.create(SolarPV.class, s);
 	}
 	
-	public double solarPrice2019 = 0.37725;
+	double solarPrice2019 = 0.37725;
 	
 	@Variable(name = "Solar Price (2019 US$ per W)")
 	double solarPrice = solarPrice2019;
@@ -21,8 +21,7 @@ public class SolarPV extends Agent<ClimateGDPGHG.Globals> {
 	double Ksquare = 0.153;
 	double theta = 0.63;
 	
-	static Action<SolarPV> updatePrice =
-			action(SolarPV::updatePrice);
+	static Action<SolarPV> updatePrice = action(SolarPV::updatePrice);
 	
 	void updatePrice() {
 		double tau = getContext().getTick();

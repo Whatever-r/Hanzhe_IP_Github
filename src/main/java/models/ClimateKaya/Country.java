@@ -1,4 +1,4 @@
-package models.ClimateGDPGHG;
+package models.ClimateKaya;
 
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
@@ -10,10 +10,11 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import static HZ_util.Print.println;
-
-public class Country extends Agent<ClimateGDPGHG.Globals> {
-	
+public class Country extends Agent<ClimateKaya.Globals> {
+	@Constant(name = "C/R Code")
+	String code;
+	@Constant(name = "Name of Country/Region")
+	String name;
 	@Constant(name = "G7 Member")
 	boolean G7;
 	@Constant(name = "G20 Member")
@@ -21,32 +22,54 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 	@Constant(name = "OECD Member")
 	boolean OECD;
 	
-	@Constant(name = "C/R Code")
-	String code;
-	@Constant(name = "Name of Country/Region")
-	String name;
-	
-	@Variable(initializable = true, name = "GDP by Country USD")
-	double GDP;
-	
-	@Variable(initializable = true, name = "Population")
-	long population;
-	
 	@Variable(initializable = true, name = "Compound Growth Rate%") // Base Compound Growth in %
 	double compGrowth;
+	@Variable(initializable = true, name = "Average Annual Temp by Country")
+	double avgAnnuTemp;
+	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")
+	double tempStepRatio;
+	
+	@Variable(initializable = true, name = "GDP by Country USD")
+	double gdp;
+	@Variable(initializable = true, name = "Population")
+	long population;
+	/**
+	 * GDP per Capita parameters
+	 */
+	@Constant(name = "GDP per Capita $ per person")
+	double gdpPerCapita;
+	@Constant(name = "GDP per Capita Count")
+	double gdpPerCapitaCount;
+	@Variable(initializable = true, name = "GDP per Capita Mu")
+	double gdpPerCapitaMu;
+	@Variable(initializable = true, name = "GDP per Capita K^2")
+	double gdpPerCapitaK2;
+	/**
+	 * Energy per GDP parameters
+	 */
+	@Constant(name = "Energy per GDP kWh/$")
+	double energyPerGdp;
+	@Constant(name = "Energy per GDP Count")
+	double energyPerGdpCount;
+	@Variable(initializable = true, name = "Energy per GDP Mu")
+	double energyPerGdpMu;
+	@Variable(initializable = true, name = "Energy per GDP K^2")
+	double energyPerGdpK2;
+	/**
+	 * Emission per Energy parameters
+	 */
+	@Constant(name = "Emission per Energy tCO2e/TWh")
+	double emisPerEnergy;
+	@Constant(name = "Emission per Energy Count")
+	double emisPerEnergyCount;
+	@Variable(initializable = true, name = "Emission per Energy Mu")
+	double emisPerEnergyMu;
+	@Variable(initializable = true, name = "Emission per Energy K^2")
+	double emisPerEnergyK2;
 	
 	@Variable(initializable = true, name = "Unit GHG Emission / GDP, tCO2e/$M ")
 	double unitGHG;
 	
-	@Variable(initializable = true, name = "Average Annual Temp by Country")
-	double avgAnnuTemp;
-	
-	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")
-	double tempStepRatio;
-	
-	//impact on growth rate in %
-//	@Variable(name = "impact of D2D Temp. Var. By Country")
-//	public double impactOfD2DVariOnGrowth;
 	
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
@@ -78,47 +101,62 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 		
 	}
 	
-	static Action<Country> sendGDP =
-			action(country -> country.getLinks(Links.UNLink.class).send(Messages.gdpValue.class, country.GDP));
-	
 	static Action<Country> gdpGrowth =
 			action(
 					country -> {
-						country.climateImpactedGrowth();
-						country.updateAvgTemp();
+						country.climateImpactedGdpGrowth();
 						country.sendGDPToUN();
-						country.sendGHGToUN();
+						country.sendGHGToUN(country.calcEmission());
+						country.updateAvgTemp();
 					}
 			);
 	
-	
 	void sendGDPToUN() {
-		getLinks(Links.UNLink.class).send(Messages.gdpValue.class, GDP);
+		getLinks(Links.UNLink.class).send(Messages.gdpValue.class, gdp);
 	}
 	
-	void sendGHGToUN() {
-		getLinks(Links.UNLink.class).send(Messages.ghgEmission.class, GDP * unitGHG);
+	void sendGHGToUN(double emission) {
+		getLinks(Links.UNLink.class).send(Messages.ghgEmission.class, emission);
 	}
 	
 	void updateAvgTemp() {
 		avgAnnuTemp += getGlobals().avgTempStep * tempStepRatio;
 	}
 	
-	void climateImpactedGrowth() {
-//		if (hasMessageOfType(Messages.temperature.class)) {
-//			double avgTemp = getMessagesOfType(Messages.temperature.class).get(0).avgTemp;
-//			avgTemp = getGlobals().avgTemp;
-//		double varTemp = getGlobals().varTemp;
-		gdpGrowth(getGlobals().avgTempStep * tempStepRatio);
-	}
-	
-	void gdpGrowth(double localTempStep) {
-//		Marginal Warming impact w.r.t to local annual average temperature
+	void climateImpactedGdpGrowth() {
+		/**Marginal Warming impact w.r.t to local annual average temperature*/
+		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
 		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
 		double coeff = 1 + (compGrowth + avgTempImpact);
-//		println(coeff);
-		this.GDP *= coeff;
+		this.gdp *= coeff;
+	}
+	
+	double calcEmission() {
+		double energyTWh = gdp * getEnergyPerGdp() / Math.pow(10, 9);
+		return energyTWh * getEmisPerEnergy();
+	}
+	
+	double getEnergyPerGdp() {
+		double tau = getContext().getTick();
+		double Astar = tau + (tau * tau) / energyPerGdpCount;
+		double avg = Math.log(energyPerGdp) / Math.log(2) + tau * energyPerGdpMu;
+		double stdevSquare = energyPerGdpK2 * Astar;
+		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+//		println(exp);
+		return Math.pow(2, exp);
+	}
+	
+	double getEmisPerEnergy() {
+		double tau = getContext().getTick();
+		double Astar = tau + (tau * tau) / emisPerEnergyCount;
+		double avg = Math.log(emisPerEnergy) + tau * emisPerEnergyMu;
+		double stdevSquare = emisPerEnergyK2 * Astar;
+		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+//		println(exp);
+		return Math.pow(2, exp);
 	}
 	
 	static Action<Country> shareTech = action(Country::shareTech);
