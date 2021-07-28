@@ -129,7 +129,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	void KayaGdp() {
 		/**GDP per Capita * Population projection*/
 		long year = getContext().getTick();
-		this.gdpPercapitaSimutaneous = getGdpPerCapita();
+//		this.gdpPercapitaSimutaneous = getGdpPerCapita();
+		this.gdpPercapitaSimutaneous *= 1 + getPrng().normal(0, 0.01).sample();
 		population = getGlobals().populationHash.get(code).get(year);
 		/**Marginal Warming impact w.r.t to local annual average temperature*/
 		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
