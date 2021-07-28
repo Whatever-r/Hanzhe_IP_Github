@@ -33,10 +33,12 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double gdp;
 	@Variable(initializable = true, name = "Population")
 	double population;
+	@Variable(name = "Step GDP per Capita")
+	double gdpPercapitaSimutaneous;
 	/**
 	 * GDP per Capita parameters
 	 */
-	@Constant(name = "GDP per Capita $ per person")
+	@Constant(name = "Initial GDP per Capita $ per person")
 	double gdpPerCapita;
 	@Constant(name = "GDP per Capita Count")
 	double gdpPerCapitaCount;
@@ -126,14 +128,14 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	void KayaGdp() {
 		/**GDP per Capita * Population projection*/
-		double year = getContext().getTick();
+		long year = getContext().getTick();
+		this.gdpPercapitaSimutaneous = getGdpPerCapita();
 		population = getGlobals().populationHash.get(code).get(year);
 		/**Marginal Warming impact w.r.t to local annual average temperature*/
 		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
 		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
 		avgTempImpact += getPrng().normal(0, 0.01).sample();
-		
-		this.gdp = getGdpPerCapita() * population * (1 - avgTempImpact);
+		this.gdp = this.gdpPercapitaSimutaneous * population * (1 - avgTempImpact);
 	}
 	
 	void climateImpactedGdpGrowth() {
@@ -155,7 +157,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double Astar = tau + (tau * tau) / gdpPerCapitaCount;
 		double avg = Math.log(gdpPerCapita) / Math.log(2) + tau * gdpPerCapitaMu;
 		double stdevSquare = gdpPerCapitaK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
 		return Math.pow(2, exp);
@@ -166,7 +168,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double Astar = tau + (tau * tau) / energyPerGdpCount;
 		double avg = Math.log(energyPerGdp) / Math.log(2) + tau * energyPerGdpMu;
 		double stdevSquare = energyPerGdpK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
 		return Math.pow(2, exp);
@@ -177,7 +179,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double Astar = tau + (tau * tau) / emisPerEnergyCount;
 		double avg = Math.log(emisPerEnergy) + tau * emisPerEnergyMu;
 		double stdevSquare = emisPerEnergyK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.0001;
+		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
 		return Math.pow(2, exp);
@@ -185,7 +187,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	static Action<Country> shareTech = action(Country::shareTech);
 	static Action<Country> improveTech = action(Country::improveUnitGHG);
-	
 	
 	void improveUnitGHG() {
 		if (hasMessageOfType(Messages.unitGHG.class)) {
@@ -201,17 +202,15 @@ public class Country extends Agent<ClimateKaya.Globals> {
 //				}
 //			});
 //			unitGHG = techImport.get();
-			List<Double> doubles = new ArrayList<>();
-			list.forEach(msg -> {
-				doubles.add(msg.getBody());
-			});
+			List<Double> doubleList = new ArrayList<>();
+			list.forEach(msg -> doubleList.add(msg.getBody()));
 			
-			Collections.sort(doubles);
-			if (doubles.get(0) >= unitGHG) return;
+			Collections.sort(doubleList);
+			if (doubleList.get(0) >= unitGHG) return;
 			
-			for (int i = 1; i < doubles.size(); i++) {
-				if (doubles.get(i) >= unitGHG && doubles.get(i - 1) < unitGHG) {
-					unitGHG = doubles.get(i - 1);
+			for (int i = 1; i < doubleList.size(); i++) {
+				if (doubleList.get(i) >= unitGHG && doubleList.get(i - 1) < unitGHG) {
+					unitGHG = doubleList.get(i - 1);
 					return;
 				}
 			}

@@ -17,7 +17,7 @@ public class SolarPV extends Agent<ClimateKaya.Globals> {
 	@Variable(name = "Solar Price (2019 US$ per W)")
 	double solarPrice = solarPrice2019;
 	
-	double expChangeRate = -0.121;
+	double mu = -0.121;
 	double Ksquare = 0.153;
 	double theta = 0.63;
 	
@@ -27,7 +27,7 @@ public class SolarPV extends Agent<ClimateKaya.Globals> {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / 44;
 		double corre = 1 + theta * theta;
-		double avg = Math.log(solarPrice2019) + tau * expChangeRate;
+		double avg = Math.log(solarPrice2019) + tau * mu;
 		double stdevSquare = Ksquare * Astar / corre;
 		
 		if (stdevSquare <= 0) stdevSquare = 0.0001;

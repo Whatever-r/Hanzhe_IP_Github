@@ -23,6 +23,7 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	
 	//	@Variable public double maxAvgTempRise = 1.5;
 //	@Variable
+	
 	public double globalGDP = 0;
 	public double globalGHG = 0;
 	

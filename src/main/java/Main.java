@@ -18,34 +18,31 @@ public class Main {
 	public static void main(String[] args) {
 		Server.register("ClimateGDPGHG", ClimateGDPGHG.class);
 		Server.register("ClimateKaya", ClimateKaya.class);
-//		Server.register("Climate", ClimateModel.class);
-//		Server.register("Tokyo", TokyoModel.class);
 		Server.run();
-		String inpath = "data/projected-population-by-country.csv";
-		List<HashMap<String, Object>> retHashMap;
 
-		HashMap<String, HashMap<Double, Double>> retHashHash;
+		String inpath = "data/projected-population-by-country.csv";
+		HashMap<String, HashMap<Long, Long>> retHashHash;
 		retHashHash = getPolulationList(inpath);
 		println(retHashHash.keySet());
 		println(retHashHash.get("DNK").keySet());
-		println(retHashHash.get("DNK").get(0));
+		println(retHashHash.get("CHN").get(0L));
 	}
 	
 	/**
 	 * Helper, Read Population Projection by Country into Hashmap<code, Hashmap<year, value>>
 	 */
-	public static HashMap<String, HashMap<Double, Double>> getPolulationList(String path) {
-		HashMap<String, HashMap<Double, Double>> retHashMap = new HashMap<>();
+	public static HashMap<String, HashMap<Long, Long>> getPolulationList(String path) {
+		HashMap<String, HashMap<Long, Long>> retHashMap = new HashMap<>();
 		try {
 			BufferedReader reader = new BufferedReader(new FileReader(path));
 			String[] headtilte = reader.readLine().
 					split(",");// header line
 			String line;
 			while ((line = reader.readLine()) != null) {
-				HashMap<Double, Double> itemMap = new HashMap<>();
+				HashMap<Long, Long> itemMap = new HashMap<>();
 				String[] itemArray = line.split(",");
 				for (int i = 1; i < itemArray.length; i++) {
-					itemMap.put(Double.parseDouble(headtilte[i]), Double.parseDouble(itemArray[i]));
+					itemMap.put(Long.parseLong(headtilte[i]), Long.parseLong(itemArray[i]));
 				}
 				retHashMap.put(itemArray[0], itemMap);
 			}
