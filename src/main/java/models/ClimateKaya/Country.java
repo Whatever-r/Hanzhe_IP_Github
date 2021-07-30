@@ -129,8 +129,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	void KayaGdp() {
 		/**GDP per Capita * Population projection*/
 		long year = getContext().getTick();
-//		this.gdpPercapitaSimutaneous = getGdpPerCapita();
-		this.gdpPercapitaSimutaneous *= 1 + getPrng().normal(0, 0.01).sample();
+		this.gdpPercapitaSimutaneous = getGdpPerCapita();
+//		this.gdpPercapitaSimutaneous *= 1 + getPrng().normal(0, 0.01).sample();
 		population = getGlobals().populationHash.get(code).get(year);
 		/**Marginal Warming impact w.r.t to local annual average temperature*/
 		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
@@ -149,7 +149,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	}
 	
 	double calcEmission() {
+		//                 USD * kWh per USD / 10ˆ9 to Trillion Wh
 		double energyTWh = gdp * getEnergyPerGdp() / Math.pow(10, 9);
+		//   Trillion Wh * tCO2e per TWh
 		return energyTWh * getEmisPerEnergy();
 	}
 	
@@ -178,7 +180,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double getEmisPerEnergy() {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / emisPerEnergyCount;
-		double avg = Math.log(emisPerEnergy) + tau * emisPerEnergyMu;
+		double avg = Math.log(emisPerEnergy) / Math.log(2) + tau * emisPerEnergyMu;
 		double stdevSquare = emisPerEnergyK2 * Astar;
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
