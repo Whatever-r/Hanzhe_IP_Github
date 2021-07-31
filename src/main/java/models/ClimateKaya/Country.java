@@ -76,7 +76,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
 	}
-	
+	/**Prune Inter-country Link by group*/
 	static Action<Country> sendGroup =
 			action(Country::sendGroupInfo);
 	
@@ -103,19 +103,23 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		
 	}
 	
+	/**Calc GDP, Emission*/
 	static Action<Country> gdpGrowth =
 			action(
 					country -> {
-//						country.climateImpactedGdpGrowth();
-						country.KayaGdp();
-						country.sendGDPToUN();
-						country.sendGHGToUN(country.calcEmission());
+//						update Avg Temp
 						country.updateAvgTemp();
+//						calc GDP w/o Marginal Loss
+						country.KayaGdp();
+//						calc & send Emission
+						country.sendGHGToUN(country.calcEmission());
+//						calc Lossed GDP & Send
+						country.sendGDPToUN(country.MarginalGdpLossCoeff());
 					}
 			);
 	
-	void sendGDPToUN() {
-		getLinks(Links.UNLink.class).send(Messages.gdpValue.class, gdp);
+	void sendGDPToUN(double lossCoeff) {
+		getLinks(Links.UNLink.class).send(Messages.gdpValue.class, gdp * lossCoeff);
 	}
 	
 	void sendGHGToUN(double emission) {
@@ -126,26 +130,21 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		avgAnnuTemp += getGlobals().avgTempStep * tempStepRatio;
 	}
 	
+	double MarginalGdpLossCoeff() {
+		/**Marginal Warming impact w.r.t to local annual average temperature*/
+		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
+		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
+		avgTempImpact += getPrng().normal(0, 0.015).sample();
+		return (1 + MarginalGdpLossCoeff());
+	}
+	
 	void KayaGdp() {
-		/**GDP per Capita * Population projection*/
+		/**GDP per Capita * Population projection * Marginal Loss*/
 		long year = getContext().getTick();
 		this.gdpPercapitaSimutaneous = getGdpPerCapita();
 //		this.gdpPercapitaSimutaneous *= 1 + getPrng().normal(0, 0.01).sample();
 		population = getGlobals().populationHash.get(code).get(year);
-		/**Marginal Warming impact w.r.t to local annual average temperature*/
-		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
-		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
-		avgTempImpact += getPrng().normal(0, 0.01).sample();
-		this.gdp = this.gdpPercapitaSimutaneous * population * (1 - avgTempImpact);
-	}
-	
-	void climateImpactedGdpGrowth() {
-		/**Marginal Warming impact w.r.t to local annual average temperature*/
-		double localTempStep = getGlobals().avgTempStep * tempStepRatio;
-		double avgTempImpact = (-0.001375 * avgAnnuTemp + 0.01125) * localTempStep;
-		avgTempImpact += getPrng().normal(0, 0.01).sample();
-		double coeff = 1 + (compGrowth + avgTempImpact);
-		this.gdp *= coeff;
+		this.gdp = this.gdpPercapitaSimutaneous * population;
 	}
 	
 	double calcEmission() {
@@ -155,6 +154,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		return energyTWh * getEmisPerEnergy();
 	}
 	
+	//USD per capita
 	double getGdpPerCapita() {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / gdpPerCapitaCount;
@@ -162,10 +162,10 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double stdevSquare = gdpPerCapitaK2 * Astar;
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-//		println(exp);
 		return Math.pow(2, exp);
 	}
 	
+	//kWh per USD
 	double getEnergyPerGdp() {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / energyPerGdpCount;
@@ -173,10 +173,10 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double stdevSquare = energyPerGdpK2 * Astar;
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-//		println(exp);
 		return Math.pow(2, exp);
 	}
 	
+	//	tCO2e per Trillion Wh
 	double getEmisPerEnergy() {
 		double tau = getContext().getTick();
 		double Astar = tau + (tau * tau) / emisPerEnergyCount;
@@ -194,17 +194,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	void improveUnitGHG() {
 		if (hasMessageOfType(Messages.unitGHG.class)) {
 			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
-//			AtomicReference<Double> techImport = new AtomicReference<>(unitGHG);
-//			AtomicReference<Double> tempDiff = new AtomicReference<>(unitGHG);
-//			list.forEach(msg -> {
-//				double msgVal = msg.getBody();
-//				double temp = unitGHG - msgVal;
-//				if (temp >= 0 && temp < tempDiff.get()) {
-//					tempDiff.set(temp);
-//					techImport.set(msgVal);
-//				}
-//			});
-//			unitGHG = techImport.get();
 			List<Double> doubleList = new ArrayList<>();
 			list.forEach(msg -> doubleList.add(msg.getBody()));
 			
