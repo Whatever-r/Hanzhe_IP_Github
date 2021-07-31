@@ -12,7 +12,19 @@ public class Messages {
 	public static class unitGHG extends Message.Double {
 	}
 	
-	//	public static class isGroupMem extends Message.Boolean{}
+	public static class EnergyPerGdpMsg extends Message.Double {
+	}
+	
+	public static class EmisPerEnergyMsg extends Message.Double {
+	
+	}
+
+	public static class Technology extends Message{
+		double energyPerGdpMsg;
+		double emisPerEnergyMsg;
+		
+	}
+	
 	public static class isGroupMem extends Message {
 		boolean isG7;
 		boolean isG20;

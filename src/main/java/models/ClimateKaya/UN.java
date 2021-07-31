@@ -21,9 +21,6 @@ public class UN extends Agent<ClimateKaya.Globals> {
 					}
 			);
 	
-	//	@Variable public double maxAvgTempRise = 1.5;
-//	@Variable
-	
 	public double globalGDP = 0;
 	public double globalGHG = 0;
 	
@@ -33,16 +30,12 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	
 	void sendTempInfo() {
 		double avgTemp = getGlobals().avgTemp;
-//		double avgTemp = getDoubleAccumulator("avgTemp").value();
 		double varTemp = getGlobals().varTemp;
-//		double varTemp = getDoubleAccumulator("varTemp").value();
-		getLinks(Links.UNLink.class)
-				.send(
-						Messages.temperature.class,
-						(m, l) -> {
-							m.avgTemp = avgTemp;
-							m.varTemp = varTemp;
-						});
+		getLinks(Links.UNLink.class).send(
+				Messages.temperature.class, (m, l) -> {
+					m.avgTemp = avgTemp;
+					m.varTemp = varTemp;
+				});
 	}
 	
 	void updateGlobalGDP() {
@@ -68,7 +61,6 @@ public class UN extends Agent<ClimateKaya.Globals> {
 				ghgEmission -> this.globalGHG += ghgEmission.getBody()
 		);
 	}
-	
 	
 	void updateAccumulator() {
 		getDoubleAccumulator("globalGDPAccu").add(this.globalGDP);

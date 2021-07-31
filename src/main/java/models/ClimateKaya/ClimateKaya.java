@@ -44,9 +44,9 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		createDoubleAccumulator("avgGlobalTempAccu", "Average Global Temperature");
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
-		getDoubleAccumulator("globalGDPAccu").add(Double.NaN);
+		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
-		getDoubleAccumulator("globalGHGAccu").add(Double.NaN);
+		getDoubleAccumulator("globalGHGAccu").add(27833931834.0);
 		
 		createDoubleAccumulator("SolarPrice", "Solar Price W/US$2019");
 		getDoubleAccumulator("SolarPrice").add(0.37725);
@@ -70,7 +70,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-					country.gdpPercapitaSimutaneous = country.gdpPerCapita;
+					country.gdpPercapitaStep = country.gdpPerCapita;
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
 				}
 		);
