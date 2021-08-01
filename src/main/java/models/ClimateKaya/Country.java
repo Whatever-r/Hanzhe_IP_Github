@@ -39,7 +39,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	@Constant(name = "Initial GDP per Capita $ per person")
 	double gdpPerCapita;
 	@Variable(name = "Step GDP per Capita")
-	double gdpPercapitaStep;
+	double gdpPerCapitaStep;
 	@Constant(name = "GDP per Capita Count")
 	double gdpPerCapitaCount;
 	@Variable(initializable = true, name = "GDP per Capita Mu")
@@ -82,7 +82,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	/**
 	 * Prune Inter-country Link by group
 	 */
-	static Action<Country> sendGroup =
+	static Action<Country> SendGroup =
 			action(Country::sendGroupInfo);
 	
 	void sendGroupInfo() {
@@ -94,7 +94,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 				}));
 	}
 	
-	static Action<Country> pruneLink =
+	static Action<Country> PruneLink =
 			action(Country::prune);
 	
 	void prune() {
@@ -108,7 +108,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	/**
 	 * Calc GDP, Emission
 	 */
-	static Action<Country> gdpGrowth =
+	static Action<Country> GdpGrowth =
 			action(
 					country -> {
 //						update Avg Temp
@@ -154,7 +154,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		/**GDP per Capita * Population projection * Marginal Loss*/
 		long year = getContext().getTick();
 		population = getGlobals().populationHash.get(code).get(year);
-		this.gdp = this.gdpPercapitaStep * population;
+		this.gdp = this.gdpPerCapitaStep * population;
 	}
 	
 	double calcEmission() {
@@ -172,7 +172,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		double stdevSquare = gdpPerCapitaK2 * Astar;
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-		this.gdpPercapitaStep = Math.pow(2, exp);
+		this.gdpPerCapitaStep = Math.pow(2, exp);
 	}
 	
 	//kWh per USD
@@ -195,7 +195,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
-		this.gdpPercapitaStep = Math.pow(2, exp);
+		this.gdpPerCapitaStep = Math.pow(2, exp);
 	}
 	
 	static Action<Country> shareTech = action(Country::shareTech);

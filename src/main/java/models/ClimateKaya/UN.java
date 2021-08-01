@@ -12,7 +12,7 @@ public class UN extends Agent<ClimateKaya.Globals> {
 					UN::sendTempInfo
 			);
 	
-	static Action<UN> updateStat =
+	static Action<UN> UpdateStat =
 			action(
 					un -> {
 						un.updateGlobalGDP();

@@ -70,7 +70,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-					country.gdpPercapitaStep = country.gdpPerCapita;
+					country.gdpPerCapitaStep = country.gdpPerCapita;
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
 				}
 		);
@@ -88,11 +88,11 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	public void step() {
 		super.step();
 		if (getContext().getTick() == 0) {
-			run(Country.sendGroup, Country.pruneLink);
+			run(Country.SendGroup, Country.PruneLink);
 		}
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
-		run(Country.gdpGrowth, UN.updateStat);
+		run(Country.GdpGrowth, UN.UpdateStat);
 		run(Country.shareTech, Country.improveTech);
 		run(SolarPV.updatePrice);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
