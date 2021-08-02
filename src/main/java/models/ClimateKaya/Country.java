@@ -195,7 +195,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		if (stdevSquare <= 0) stdevSquare = 0.000001;
 		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
-		this.gdpPerCapitaStep = Math.pow(2, exp);
+		this.emisPerEnergyStep = Math.pow(2, exp);
 	}
 	
 	static Action<Country> shareTech = action(Country::shareTech);
