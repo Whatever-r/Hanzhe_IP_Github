@@ -193,29 +193,40 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		long currYear = getContext().getTick();
 		double tau = currYear - energyPerGdpLU;
 		if (tau <= techEvolvePeriod) {
-			double avg =
-			
+			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpEvoCoeff;
+			double stdev = energyPerGdpEvoCoeff / 50;
+			double exp = getPrng().normal(avg, stdev).sample();
+			this.energyPerGdpStep = Math.pow(2, exp);
+		} else {
+			double Astar = tau + (tau * tau) / energyPerGdpCount;
+			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpMu;
+		// double avg = Math.log(energyPerGdpStep) / Math.log(2) + energyPerGdpMu;
+			double stdevSquare = energyPerGdpK2 * Astar;
+			if (stdevSquare <= 0) stdevSquare = 0.000001;
+			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+			this.energyPerGdpStep = Math.pow(2, exp);
 		}
-		double Astar = tau + (tau * tau) / energyPerGdpCount;
-		double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpMu;
-//		double avg = Math.log(energyPerGdpStep) / Math.log(2) + energyPerGdpMu;
-		double stdevSquare = energyPerGdpK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.000001;
-		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-		this.energyPerGdpStep = Math.pow(2, exp);
 	}
 	
 	//	tCO2e per Trillion Wh
 	void getEmisPerEnergy() {
-		double tau = getContext().getTick() - emisPerEnergyLU;
-		double Astar = tau + (tau * tau) / emisPerEnergyCount;
-		double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyMu;
+		long currYear = getContext().getTick();
+		double tau = currYear - emisPerEnergyLU;
+		if (tau <= techEvolvePeriod) {
+			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyEvoCoeff;
+			double stdev = emisPerEnergyEvoCoeff / 50;
+			double exp = getPrng().normal(avg, stdev).sample();
+			this.emisPerEnergyStep = Math.pow(2, exp);
+		} else {
+			double Astar = tau + (tau * tau) / emisPerEnergyCount;
+			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyMu;
 //		double avg = Math.log(emisPerEnergyStep) / Math.log(2) + emisPerEnergyMu;
-		double stdevSquare = emisPerEnergyK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.000001;
-		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+			double stdevSquare = emisPerEnergyK2 * Astar;
+			if (stdevSquare <= 0) stdevSquare = 0.000001;
+			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 //		println(exp);
-		this.emisPerEnergyStep = Math.pow(2, exp);
+			this.emisPerEnergyStep = Math.pow(2, exp);
+		}
 	}
 	
 	/**

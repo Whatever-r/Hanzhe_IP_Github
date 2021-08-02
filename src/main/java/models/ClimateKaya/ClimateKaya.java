@@ -70,7 +70,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Init Country agents at 2020 w/ CSV source data
 		Group<Country> countryGroup = loadGroup(Country.class, CountryInitial,
 				country -> {
-					country.gdpPerCapitaStep = country.gdpPerCapita;
+					country.gdpPerCapitaStep = country.gdpPerCapitaRef;
 					country.emisPerEnergyStep = country.emisPerEnergyRef;
 					country.energyPerGdpStep = country.energyPerGdpRef;
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
