@@ -9,14 +9,7 @@ public class Messages {
 	public static class ghgEmission extends Message.Double {
 	}
 	
-	public static class unitGHG extends Message.Double {
-	}
-	
-	public static class EnergyPerGdpMsg extends Message.Double {
-	}
-	
-	public static class EmisPerEnergyMsg extends Message.Double {
-	
+	public static class gdpPerCapitaMsg extends Message.Double {
 	}
 
 	public static class Technology extends Message{
@@ -31,8 +24,4 @@ public class Messages {
 		boolean isOECD;
 	}
 	
-	public static class temperature extends Message {
-		double avgTemp;
-		double varTemp;
-	}
 }

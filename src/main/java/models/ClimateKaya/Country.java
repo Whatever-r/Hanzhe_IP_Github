@@ -289,7 +289,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 			// Get expected technology level after the evolution period
 			// and set corresponding values
 			// Target value is the minimal one which is better than the expected self-developmemt result
-			
 			long currTick = getContext().getTick();
 			if (currTick - emisPerEnergyLU > techEvolvePeriod) {
 				double emisPerEnergyExpect = Math.pow(2, Math.log(emisPerEnergyStep) / Math.log(2)
@@ -327,42 +326,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 			}
 		}
 	}
-
-
-//	static Action<Country> shareGHG = action(Country::shareUnitGHG);
-//	static Action<Country> improveGHG = action(Country::improveUnitGHG);
-
-
-//	void improveUnitGHG() {
-//		if (hasMessageOfType(Messages.unitGHG.class)) {
-//			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
-//			List<Double> doubleList = new ArrayList<>();
-//			list.forEach(msg -> doubleList.add(msg.getBody()));
-//
-//			Collections.sort(doubleList);
-//			if (doubleList.get(0) >= unitGHG) return;
-//
-//			for (int i = 1; i < doubleList.size(); i++) {
-//				if (doubleList.get(i) >= unitGHG && doubleList.get(i - 1) < unitGHG) {
-//					unitGHG = doubleList.get(i - 1);
-//					return;
-//				}
-//			}
-//		}
-//	}
-
-
-//	void shareUnitGHG() {
-//		unitGHG *= getGlobals().techImprove;
-//
-//		if (getGlobals().techShareOpt == 1)
-//			getLinks(Links.G7Link.class).send(Messages.unitGHG.class, unitGHG);
-//		if (getGlobals().techShareOpt == 2)
-//			getLinks(Links.G20Link.class).send(Messages.unitGHG.class, unitGHG);
-//		if (getGlobals().techShareOpt == 3)
-//			getLinks(Links.InterLink.class).send(Messages.unitGHG.class, unitGHG);
-//	}
-	
 }
 
 

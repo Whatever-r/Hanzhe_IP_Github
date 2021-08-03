@@ -30,8 +30,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public double avgTempStep = 0.1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
 		public int techShareOpt;
-//		@Variable(name = "D2D Variation of Temperature")
-//		public double varTemp = 1.5;
 		//Polulation Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}
@@ -45,8 +43,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(27833931834.0);
-//		createDoubleAccumulator("SolarPrice", "Solar Price W/US$2019");
-//		getDoubleAccumulator("SolarPrice").add(0.37725);
 		createLongAccumulator("energyPerGdpAccu", "Count of Energy Per GDP Adoption");
 		createLongAccumulator("energyPerGdpFin", "Count of Energy Per GDP - Finish");
 		createLongAccumulator("emisPerEnergyAccu", "Count of Emission Per Energy Adoption");
@@ -63,7 +59,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	
 	@Override
 	public void setup() {
-//		EmpiricalDistribution initGDP = getContext().getPrng().empiricalFromSource(new CSVSource("data/gdp-distribution.csv"));
 		CSVSource CountryInitial = new CSVSource("data/Kaya Metric.csv");
 		getGlobals().populationHash = getPolulationList("data/projected-population-by-country.csv");
 		Group<UN> unGroup = generateGroup(UN.class, nbUN, un -> un.globalGDP = 0);
@@ -76,8 +71,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
 				}
 		);
-//		Group<SolarPV> solarPVGroup = generateGroup(SolarPV.class, 1);
-		
 		countryGroup.partitionConnected(unGroup, Links.UNLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.InterLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);
@@ -97,7 +90,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		run(Country.GdpGrowth, UN.UpdateStat);
 //		run(Country.shareGHG, Country.improveGHG);
 		run(Country.SendTech, Country.ImproveTech);
-//		run(SolarPV.updatePrice);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
