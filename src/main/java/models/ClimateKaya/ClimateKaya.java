@@ -29,9 +29,9 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
-		public int techShareOpt = 0;
+		public int techShareOpt;
 		@Constant(name = "Share GDP pp")
-		public boolean gdpShareOpt = false;
+		public boolean gdpShareOpt;
 		//Polulation Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}
@@ -39,16 +39,20 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	
 	@Override
 	public void init() {
+		//Temp, GDP, GHG accumulator & initial value
 		createDoubleAccumulator("avgGlobalTempAccu", "Average Global Temperature");
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(27833931834.0);
+		// Count no. of technology & GDP adoption
 		createLongAccumulator("energyPerGdpAccu", "Count of Energy Per GDP Adoption");
 		createLongAccumulator("energyPerGdpFin", "Count of Energy Per GDP - Finish");
 		createLongAccumulator("emisPerEnergyAccu", "Count of Emission Per Energy Adoption");
 		createLongAccumulator("emisPerEnergyFin", "Count of Emission Per Energy - Finish");
+		createLongAccumulator("gdpPerCapitaAccu", "Count of GDP Per Capita Adoption");
+		createLongAccumulator("gdpPerCapitaFin", "Count of GDP Per Capita - Finish");
 		registerAgentTypes(Country.class, UN.class, SolarPV.class);
 		registerLinkTypes(Links.UNLink.class,
 				Links.INTLLink.class,
@@ -90,7 +94,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
 		run(Country.GdpGrowth, UN.UpdateStat);
-//		run(Country.shareGHG, Country.improveGHG);
+		run(Country.SendGDP, Country.ImproveGDP);
 		run(Country.SendTech, Country.ImproveTech);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);

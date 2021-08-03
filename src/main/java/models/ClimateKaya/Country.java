@@ -180,20 +180,35 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	//USD per capita
 	void getGdpPerCapita() {
-		long tau = getContext().getTick();
-		double Astar = tau + (tau * tau) / gdpPerCapitaCount;
-		double avg = Math.log(gdpPerCapitaRef) / Math.log(2) + tau * gdpPerCapitaMu;
-//		double avg = Math.log(gdpPerCapitaStep) / Math.log(2) + gdpPerCapitaMu;
-		double stdevSquare = gdpPerCapitaK2 * Astar;
-		if (stdevSquare <= 0) stdevSquare = 0.000001;
-		double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-		this.gdpPerCapitaStep = Math.pow(2, exp);
+		long currYear = getContext().getTick();
+		double tau = currYear - gdpPerCapitaLU;
+//		if is in progress of adopting from other country
+		if (gdpPerCapitaInProgress && tau <= gdpEvolvePeriod) {
+			double avg = Math.log(gdpPerCapitaRef) / Math.log(2) + tau * gdpPerCapitaEvoCoeff;
+			double stdev = Math.max(0.000001, gdpPerCapitaEvoCoeff / 50);
+			double exp = getPrng().normal(avg, stdev).sample();
+			this.gdpPerCapitaStep = Math.pow(2, exp);
+			//at the end of adoption, update the ref value
+			if (tau == gdpEvolvePeriod) {
+				gdpPerCapitaRef = gdpPerCapitaStep;
+				gdpPerCapitaInProgress = false;
+				getLongAccumulator("gdpPerCapitaFin").add(1L);
+			}
+		} else {
+			double Astar = tau + (tau * tau) / gdpPerCapitaCount;
+			double avg = Math.log(gdpPerCapitaRef) / Math.log(2) + tau * gdpPerCapitaMu;
+			//avoid 0 stdev error
+			double stdevSquare = Math.max(0.000001, gdpPerCapitaK2 * Astar);
+			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
+			this.gdpPerCapitaStep = Math.pow(2, exp);
+		}
 	}
 	
 	//kWh per USD
 	void getEnergyPerGdp() {
 		long currYear = getContext().getTick();
 		double tau = currYear - energyPerGdpLU;
+		// Improve the parameter aiming to achieve the target value at the end of period
 		if (energyPerGdpInProgress && tau <= techEvolvePeriod) {
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpEvoCoeff;
 			double stdev = Math.max(0.000001, energyPerGdpEvoCoeff / 50);
@@ -208,9 +223,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		} else {
 			double Astar = tau + (tau * tau) / energyPerGdpCount;
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpMu;
-			// double avg = Math.log(energyPerGdpStep) / Math.log(2) + energyPerGdpMu;
-			double stdevSquare = energyPerGdpK2 * Astar;
-			if (stdevSquare <= 0) stdevSquare = 0.000001;
+			
+			double stdevSquare = Math.max(0.000001, energyPerGdpK2 * Astar);
 			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 			this.energyPerGdpStep = Math.pow(2, exp);
 		}
@@ -235,11 +249,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		} else {
 			double Astar = tau + (tau * tau) / emisPerEnergyCount;
 			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyMu;
-//		double avg = Math.log(emisPerEnergyStep) / Math.log(2) + emisPerEnergyMu;
 			double stdevSquare = emisPerEnergyK2 * Astar;
 			if (stdevSquare <= 0) stdevSquare = 0.000001;
 			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
-//		println(exp);
 			this.emisPerEnergyStep = Math.pow(2, exp);
 		}
 	}
@@ -251,7 +263,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	static Action<Country> ImproveGDP = action(Country::ImproveGDP);
 	
 	void SendGDP() {
-		if (getGlobals().gdpShareOpt && getContext().getTick() <= techEvolvePeriod)
+		if (!getGlobals().gdpShareOpt || getContext().getTick() <= techEvolvePeriod)
 			return;
 		if (getGlobals().techShareOpt == 1)
 			getLinks(Links.G7Link.class).send(Messages.GdpPerCapitaMsg.class, gdpPerCapitaStep);
@@ -280,13 +292,13 @@ public class Country extends Agent<ClimateKaya.Globals> {
 				gdpPerCapitaTarget = gdpPerCapitaExpect;
 				for (int i = 1; i < gdpPerCapitaList.size(); i++) {
 					if (gdpPerCapitaList.get(i) >= gdpPerCapitaExpect && gdpPerCapitaList.get(i - 1) < gdpPerCapitaExpect) {
-						gdpPerCapitaTarget = gdpPerCapitaList.get(i - 1);
-						emisPerEnergyEvoCoeff = (Math.log(gdpPerCapitaTarget) - Math.log(emisPerEnergyStep))
-								/ (Math.log(2) * techEvolvePeriod);
-						emisPerEnergyLU = currTick;
-						emisPerEnergyRef = emisPerEnergyStep;
-						emisPerEnergyInProgress = true;
-						getLongAccumulator("emisPerEnergyAccu").add(1L);
+						gdpPerCapitaTarget = gdpPerCapitaList.get(i);
+						gdpPerCapitaEvoCoeff = (Math.log(gdpPerCapitaTarget) - Math.log(gdpPerCapitaStep))
+								/ (Math.log(2) * gdpEvolvePeriod);
+						gdpPerCapitaLU = currTick;
+						gdpPerCapitaRef = gdpPerCapitaStep;
+						gdpPerCapitaInProgress = true;
+						getLongAccumulator("gdpPerCapitaAccu").add(1L);
 						break;
 					}
 				}
