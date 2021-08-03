@@ -35,8 +35,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double avgAnnuTemp;
 	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")
 	double tempStepRatio;
-	
-	@Variable(initializable = true, name = "GDP by Country USD")
+		@Variable(initializable = true, name = "GDP by Country USD")
 	double gdp;
 	@Variable(initializable = true, name = "Population")
 	double population;
