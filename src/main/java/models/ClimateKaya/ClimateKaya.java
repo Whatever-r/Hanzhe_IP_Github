@@ -28,14 +28,10 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
-		@Constant(name = "Tech Improve")
-		public double techImprove = 1;
-		@Constant(name = "unitGHGShare Global")
-		public double unitGHGShare = 1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
-		public int techShareOpt = 1;
-		@Variable(name = "D2D Variation of Temperature")
-		public double varTemp = 1.5;
+		public int techShareOpt;
+//		@Variable(name = "D2D Variation of Temperature")
+//		public double varTemp = 1.5;
 		//Polulation Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}

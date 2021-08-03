@@ -1,4 +1,3 @@
-import models.ClimateGDPGHG.ClimateGDPGHG;
 import models.ClimateKaya.ClimateKaya;
 import simudyne.nexus.Server;
 

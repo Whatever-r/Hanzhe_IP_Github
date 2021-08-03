@@ -7,10 +7,8 @@ import simudyne.core.functions.SerializableConsumer;
 import java.util.List;
 
 public class UN extends Agent<ClimateKaya.Globals> {
-	static Action<UN> sendTemp =
-			action(
-					UN::sendTempInfo
-			);
+//	static Action<UN> sendTemp =
+//			action(UN::sendTempInfo);
 	
 	static Action<UN> UpdateStat =
 			action(
@@ -28,15 +26,15 @@ public class UN extends Agent<ClimateKaya.Globals> {
 		return Action.create(UN.class, consumer);
 	}
 	
-	void sendTempInfo() {
-		double avgTemp = getGlobals().avgTemp;
-		double varTemp = getGlobals().varTemp;
-		getLinks(Links.UNLink.class).send(
-				Messages.temperature.class, (m, l) -> {
-					m.avgTemp = avgTemp;
-					m.varTemp = varTemp;
-				});
-	}
+//	void sendTempInfo() {
+//		double avgTemp = getGlobals().avgTemp;
+//		double varTemp = getGlobals().varTemp;
+//		getLinks(Links.UNLink.class).send(
+//				Messages.temperature.class, (m, l) -> {
+//					m.avgTemp = avgTemp;
+//					m.varTemp = varTemp;
+//				});
+//	}
 	
 	void updateGlobalGDP() {
 		List<Messages.gdpValue> gdpValueList = getMessagesOfType(Messages.gdpValue.class);

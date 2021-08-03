@@ -15,9 +15,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	// At most 1x tech adoption for every 3 year
 	long techEvolvePeriod = 3;
 	
-	@Constant(name = "unitGHGShare")
-	double unitGHGShare;
-	
 	@Constant(name = "C/R Code")
 	String code;
 	@Constant(name = "Name of Country/Region")
@@ -35,7 +32,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double avgAnnuTemp;
 	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")
 	double tempStepRatio;
-		@Variable(initializable = true, name = "GDP by Country USD")
+	@Variable(initializable = true, name = "GDP by Country USD")
 	double gdp;
 	@Variable(initializable = true, name = "Population")
 	double population;
@@ -86,7 +83,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double emisPerEnergyTarget = emisPerEnergyStep;
 	double emisPerEnergyEvoCoeff = emisPerEnergyMu;
 	boolean emisPerEnergyInProgress = false;
-	
+
 
 //	@Variable(initializable = true, name = "Unit GHG Emission / GDP, tCO2e/$M ")
 //	double unitGHG;
@@ -253,7 +250,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	static Action<Country> ImproveTech = action(Country::ImproveTech);
 	
 	void SendTech() {
-		if(getContext().getTick()<= techEvolvePeriod)
+		if (getContext().getTick() <= techEvolvePeriod)
 			return;
 		if (getGlobals().techShareOpt == 1)
 			getLinks(Links.G7Link.class).send(
@@ -278,59 +275,57 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	}
 	
 	void ImproveTech() {
-		if (!hasMessageOfType(Messages.Technology.class))
-			return;
+		if (hasMessageOfType(Messages.Technology.class)) {
 //		Read & Sort
-		List<Messages.Technology> techMsgList = getMessagesOfType(Messages.Technology.class);
-		List<Double> emisPerEnergyList = new ArrayList<>();
-		List<Double> energyPerGdpList = new ArrayList<>();
-		techMsgList.forEach(tech -> {
-			emisPerEnergyList.add(tech.emisPerEnergyMsg);
-			energyPerGdpList.add(tech.energyPerGdpMsg);
-		});
-		Collections.sort(emisPerEnergyList);
-		Collections.sort(energyPerGdpList);
-		// Get expected technology level after the evolution period
-		// and set corresponding values
-		// Target value is the minimal one which is better than the expected self-developmemt result
-		
-		long currTick = getContext().getTick();
-		if (currTick - emisPerEnergyLU > techEvolvePeriod) {
-			double emisPerEnergyExpect = Math.pow(2, Math.log(emisPerEnergyStep) / Math.log(2)
-					+ techEvolvePeriod * emisPerEnergyMu);
-			emisPerEnergyTarget = emisPerEnergyExpect;
-			for (int i = 1; i < emisPerEnergyList.size(); i++) {
-				if (emisPerEnergyList.get(i) >= emisPerEnergyExpect && emisPerEnergyList.get(i - 1) < emisPerEnergyExpect) {
-					emisPerEnergyTarget = emisPerEnergyList.get(i - 1);
-					emisPerEnergyEvoCoeff = (Math.log(emisPerEnergyTarget) - Math.log(emisPerEnergyStep))
-							/ (Math.log(2) * techEvolvePeriod);
-					emisPerEnergyLU = getContext().getTick();
-					emisPerEnergyLU = currTick;
-					emisPerEnergyRef = emisPerEnergyStep;
-					emisPerEnergyInProgress = true;
-					getLongAccumulator("emisPerEnergyAccu").add(1L);
-					break;
+			List<Messages.Technology> techMsgList = getMessagesOfType(Messages.Technology.class);
+			List<Double> emisPerEnergyList = new ArrayList<>();
+			List<Double> energyPerGdpList = new ArrayList<>();
+			techMsgList.forEach(tech -> {
+				emisPerEnergyList.add(tech.emisPerEnergyMsg);
+				energyPerGdpList.add(tech.energyPerGdpMsg);
+			});
+			Collections.sort(emisPerEnergyList);
+			Collections.sort(energyPerGdpList);
+			// Get expected technology level after the evolution period
+			// and set corresponding values
+			// Target value is the minimal one which is better than the expected self-developmemt result
+			
+			long currTick = getContext().getTick();
+			if (currTick - emisPerEnergyLU > techEvolvePeriod) {
+				double emisPerEnergyExpect = Math.pow(2, Math.log(emisPerEnergyStep) / Math.log(2)
+						+ techEvolvePeriod * emisPerEnergyMu);
+				emisPerEnergyTarget = emisPerEnergyExpect;
+				for (int i = 1; i < emisPerEnergyList.size(); i++) {
+					if (emisPerEnergyList.get(i) >= emisPerEnergyExpect && emisPerEnergyList.get(i - 1) < emisPerEnergyExpect) {
+						emisPerEnergyTarget = emisPerEnergyList.get(i - 1);
+						emisPerEnergyEvoCoeff = (Math.log(emisPerEnergyTarget) - Math.log(emisPerEnergyStep))
+								/ (Math.log(2) * techEvolvePeriod);
+						emisPerEnergyLU = currTick;
+						emisPerEnergyRef = emisPerEnergyStep;
+						emisPerEnergyInProgress = true;
+						getLongAccumulator("emisPerEnergyAccu").add(1L);
+						break;
+					}
+				}
+			}
+			if (currTick - energyPerGdpLU > techEvolvePeriod) {
+				double energyPerGdpExpect = Math.pow(2, Math.log(energyPerGdpStep) / Math.log(2)
+						+ techEvolvePeriod * energyPerGdpMu);
+				energyPerGdpTarget = energyPerGdpExpect;
+				for (int i = 1; i < energyPerGdpList.size(); i++) {
+					if (energyPerGdpList.get(i) >= energyPerGdpExpect && energyPerGdpList.get(i - 1) < energyPerGdpExpect) {
+						energyPerGdpTarget = energyPerGdpList.get(i - 1);
+						energyPerGdpEvoCoeff = (Math.log(energyPerGdpTarget) - Math.log(energyPerGdpStep))
+								/ (Math.log(2) * techEvolvePeriod);
+						energyPerGdpLU = currTick;
+						energyPerGdpRef = energyPerGdpStep;
+						energyPerGdpInProgress = true;
+						getLongAccumulator("energyPerGdpAccu").add(1L);
+						break;
+					}
 				}
 			}
 		}
-		if (currTick - energyPerGdpLU > techEvolvePeriod) {
-			double energyPerGdpExpect = Math.pow(2, Math.log(energyPerGdpStep) / Math.log(2)
-					+ techEvolvePeriod * energyPerGdpMu);
-			energyPerGdpTarget = energyPerGdpExpect;
-			for (int i = 1; i < energyPerGdpList.size(); i++) {
-				if (energyPerGdpList.get(i) >= energyPerGdpExpect && energyPerGdpList.get(i - 1) < energyPerGdpExpect) {
-					energyPerGdpTarget = emisPerEnergyList.get(i - 1);
-					energyPerGdpEvoCoeff = (Math.log(energyPerGdpTarget) - Math.log(energyPerGdpStep))
-							/ (Math.log(2) * techEvolvePeriod);
-					energyPerGdpLU = currTick;
-					energyPerGdpRef = energyPerGdpStep;
-					energyPerGdpInProgress = true;
-					getLongAccumulator("energyPerGdpAccu").add(1L);
-					break;
-				}
-			}
-		}
-		
 	}
 
 
