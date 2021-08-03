@@ -159,11 +159,11 @@ public class Country extends Agent<ClimateGDPGHG.Globals> {
 	void shareTech() {
 		unitGHG *= getGlobals().techImprove;
 		
-		if (getGlobals().unitGHGShare == 1)
+		if (getGlobals().techShare == 1)
 			getLinks(Links.G7Link.class).send(Messages.unitGHG.class, unitGHG);
-		if (getGlobals().unitGHGShare == 2)
+		if (getGlobals().techShare == 2)
 			getLinks(Links.G20Link.class).send(Messages.unitGHG.class, unitGHG);
-		if (getGlobals().unitGHGShare == 3)
+		if (getGlobals().techShare == 3)
 			getLinks(Links.InterLink.class).send(Messages.unitGHG.class, unitGHG);
 	}
 	

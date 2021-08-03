@@ -26,7 +26,7 @@ public class ClimateGDPGHG extends AgentBasedModel<ClimateGDPGHG.Globals> {
 		@Constant(name = "Tech Improve")
 		public double techImprove = 1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
-		public int unitGHGShare = 0;
+		public int techShare = 0;
 		//		@Constant(name = "growth decay coeff.")
 //		public double decay = 0.001;
 		@Variable(name = "D2D Variation of Temperature")

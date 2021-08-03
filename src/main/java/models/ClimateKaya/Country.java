@@ -15,6 +15,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	// At most 1x tech adoption for every 3 year
 	long techEvolvePeriod = 3;
 	
+	@Constant(name = "unitGHGShare")
+	double unitGHGShare;
+	
 	@Constant(name = "C/R Code")
 	String code;
 	@Constant(name = "Name of Country/Region")
