@@ -29,7 +29,9 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
-		public int techShareOpt;
+		public int techShareOpt = 0;
+		@Constant(name = "Share GDP pp")
+		public boolean gdpShareOpt = false;
 		//Polulation Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}
@@ -49,7 +51,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		createLongAccumulator("emisPerEnergyFin", "Count of Emission Per Energy - Finish");
 		registerAgentTypes(Country.class, UN.class, SolarPV.class);
 		registerLinkTypes(Links.UNLink.class,
-				Links.InterLink.class,
+				Links.INTLLink.class,
 				Links.G7Link.class,
 				Links.G20Link.class,
 				Links.OECDLink.class
@@ -72,7 +74,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 				}
 		);
 		countryGroup.partitionConnected(unGroup, Links.UNLink.class);
-		countryGroup.fullyConnected(countryGroup, Links.InterLink.class);
+		countryGroup.fullyConnected(countryGroup, Links.INTLLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);
 		countryGroup.fullyConnected(countryGroup, Links.G20Link.class);
 		countryGroup.fullyConnected(countryGroup, Links.OECDLink.class);
@@ -95,7 +97,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	}
 	
 	/**
-	 * Helper, Read Population Projection by Country into Hashmap<code, Hashmap<year, value>>
+	 * Helper, Read Population Projection by Country into Hashmap<country code, Hashmap<year, value>>
 	 */
 	public static HashMap<String, HashMap<Long, Long>> getPolulationList(String path) {
 		HashMap<String, HashMap<Long, Long>> retHashMap = new HashMap<>();

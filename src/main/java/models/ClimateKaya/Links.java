@@ -6,7 +6,7 @@ public class Links {
 	public static class UNLink extends Link.Empty {
 	}
 	
-	public static class InterLink extends Link.Empty{}
+	public static class INTLLink extends Link.Empty{}
 	
 	public static class G7Link extends Link.Empty {
 	}

@@ -3,13 +3,13 @@ package models.ClimateKaya;
 import simudyne.core.graph.Message;
 
 public class Messages {
-	public static class gdpValue extends Message.Double {
+	public static class GdpValue extends Message.Double {
 	}
 	
-	public static class ghgEmission extends Message.Double {
+	public static class GhgEmission extends Message.Double {
 	}
 	
-	public static class gdpPerCapitaMsg extends Message.Double {
+	public static class GdpPerCapitaMsg extends Message.Double {
 	}
 
 	public static class Technology extends Message{

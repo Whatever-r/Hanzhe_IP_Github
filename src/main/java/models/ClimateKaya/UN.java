@@ -25,11 +25,11 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	}
 	
 	void updateGlobalGDP() {
-		List<Messages.gdpValue> gdpValueList = getMessagesOfType(Messages.gdpValue.class);
+		List<Messages.GdpValue> gdpValueList = getMessagesOfType(Messages.GdpValue.class);
 		calcGlobalGDP(gdpValueList);
 	}
 	
-	void calcGlobalGDP(List<Messages.gdpValue> gdpValueList) {
+	void calcGlobalGDP(List<Messages.GdpValue> gdpValueList) {
 		this.globalGDP = 0;
 		gdpValueList.forEach(
 				gdpValue -> this.globalGDP += gdpValue.getBody()
@@ -37,11 +37,11 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	}
 	
 	void updateGlobalGHG() {
-		List<Messages.ghgEmission> ghgEmissionList = getMessagesOfType(Messages.ghgEmission.class);
+		List<Messages.GhgEmission> ghgEmissionList = getMessagesOfType(Messages.GhgEmission.class);
 		calcGlobalGHG(ghgEmissionList);
 	}
 	
-	void calcGlobalGHG(List<Messages.ghgEmission> ghgEmissionList) {
+	void calcGlobalGHG(List<Messages.GhgEmission> ghgEmissionList) {
 		this.globalGHG = 0;
 		ghgEmissionList.forEach(
 				ghgEmission -> this.globalGHG += ghgEmission.getBody()

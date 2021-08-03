@@ -50,47 +50,5 @@ public class Main {
 		}
 		return retHashMap;
 	}
-	
-	public static List<Map<String, String>> readWithMap(String path) {
-		Pattern pattern = Pattern.compile(",");
-		List<Map<String, String>> namefreq = null;
-		try (BufferedReader in = new BufferedReader(new FileReader(path))) {
-			namefreq = in.lines()
-					.skip(1)
-					.map(line -> pattern.split(line)) // or pattern::split
-					.map(line -> {
-						Map<String, String> map = new HashMap<>();
-						map.put("NAME_OF_FIRST_COLUMN", line[0]);
-						map.put("NAME_OF_SECOND_COLUMN", line[1]);
-						// ... (etc)
-						return map;
-					})
-					.collect(Collectors.toList());
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return namefreq;
-	}
-	
-	public static List<HashMap<String, Object>> getcsvTableList(String path) {
-		List<HashMap<String, Object>> retHashMap = new ArrayList<>();
-		try {
-			BufferedReader reader = new BufferedReader(new FileReader(path));
-			String[] headtilte = reader.readLine().
-					split("\\|");// 第一行信息，为标题信息，不用，如果需要，注释掉
-			String line;
-			while ((line = reader.readLine()) != null) {
-				HashMap<String, Object> itemMap = new HashMap<>();
-				String[] itemArray = line.split("\\|");
-				for (int i = 0; i < itemArray.length; i++) {
-					itemMap.put(headtilte[i], itemArray[i]);
-				}
-				retHashMap.add(itemMap);
-			}
-		} catch (Exception e) {
-			e.printStackTrace();
-		}
-		return retHashMap;
-	}
 }
 
