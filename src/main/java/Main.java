@@ -16,7 +16,7 @@ import java.util.stream.Collectors;
 
 public class Main {
 	public static void main(String[] args) {
-		Server.register("ClimateGDPGHG", ClimateGDPGHG.class);
+//		Server.register("ClimateGDPGHG", ClimateGDPGHG.class);
 		Server.register("ClimateKaya", ClimateKaya.class);
 		Server.run();
 

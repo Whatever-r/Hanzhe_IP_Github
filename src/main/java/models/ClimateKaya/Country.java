@@ -1,5 +1,6 @@
 package models.ClimateKaya;
 
+import org.apache.commons.math3.analysis.function.Max;
 import simudyne.core.abm.Action;
 import simudyne.core.abm.Agent;
 import simudyne.core.annotations.Constant;
@@ -64,8 +65,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	// Tech Evolve related
 	long energyPerGdpLU = 0;    // Last update year
 	double energyPerGdpTarget = energyPerGdpStep;
-	double energyPerGdpEvoCoeff;
-	long energyPerGdpEvoStage = 0;
+	double energyPerGdpEvoCoeff = energyPerGdpMu;
+	boolean energyPerGdpInProgress = false;
 	/**
 	 * Emission per Energy parameters
 	 */
@@ -81,11 +82,12 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	// Tech Evolve related
 	long emisPerEnergyLU = 0; // Last update year
 	double emisPerEnergyTarget = emisPerEnergyStep;
-	double emisPerEnergyEvoCoeff;
-	long emisPerEnergyEvoStage = 0;
+	double emisPerEnergyEvoCoeff = emisPerEnergyMu;
+	boolean emisPerEnergyInProgress = false;
 	
-	@Variable(initializable = true, name = "Unit GHG Emission / GDP, tCO2e/$M ")
-	double unitGHG;
+
+//	@Variable(initializable = true, name = "Unit GHG Emission / GDP, tCO2e/$M ")
+//	double unitGHG;
 	
 	private static Action<Country> action(SerializableConsumer<Country> consumer) {
 		return Action.create(Country.class, consumer);
@@ -192,15 +194,21 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	void getEnergyPerGdp() {
 		long currYear = getContext().getTick();
 		double tau = currYear - energyPerGdpLU;
-		if (tau <= techEvolvePeriod) {
+		if (energyPerGdpInProgress && tau <= techEvolvePeriod) {
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpEvoCoeff;
-			double stdev = energyPerGdpEvoCoeff / 50;
+			double stdev = Math.max(0.000001, energyPerGdpEvoCoeff / 50);
 			double exp = getPrng().normal(avg, stdev).sample();
 			this.energyPerGdpStep = Math.pow(2, exp);
+//			at the end of adoption, update the ref value
+			if (tau == techEvolvePeriod) {
+				energyPerGdpRef = energyPerGdpStep;
+				energyPerGdpInProgress = false;
+				getLongAccumulator("energyPerGdpFin").add(1L);
+			}
 		} else {
 			double Astar = tau + (tau * tau) / energyPerGdpCount;
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpMu;
-		// double avg = Math.log(energyPerGdpStep) / Math.log(2) + energyPerGdpMu;
+			// double avg = Math.log(energyPerGdpStep) / Math.log(2) + energyPerGdpMu;
 			double stdevSquare = energyPerGdpK2 * Astar;
 			if (stdevSquare <= 0) stdevSquare = 0.000001;
 			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
@@ -212,11 +220,18 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	void getEmisPerEnergy() {
 		long currYear = getContext().getTick();
 		double tau = currYear - emisPerEnergyLU;
-		if (tau <= techEvolvePeriod) {
+//		if is in technology adoption period
+		if (emisPerEnergyInProgress && tau <= techEvolvePeriod) {
 			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyEvoCoeff;
-			double stdev = emisPerEnergyEvoCoeff / 50;
+			double stdev = Math.max(0.000001, emisPerEnergyEvoCoeff / 50);
 			double exp = getPrng().normal(avg, stdev).sample();
 			this.emisPerEnergyStep = Math.pow(2, exp);
+//			at the end of adoption, update the ref value
+			if (tau == techEvolvePeriod) {
+				emisPerEnergyInProgress = false;
+				emisPerEnergyRef = emisPerEnergyStep;
+				getLongAccumulator("emisPerEnergyFin").add(1L);
+			}
 		} else {
 			double Astar = tau + (tau * tau) / emisPerEnergyCount;
 			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyMu;
@@ -236,21 +251,23 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	static Action<Country> ImproveTech = action(Country::ImproveTech);
 	
 	void SendTech() {
-		if (getGlobals().unitGHGShare == 1)
+		if(getContext().getTick()<= techEvolvePeriod)
+			return;
+		if (getGlobals().techShareOpt == 1)
 			getLinks(Links.G7Link.class).send(
 					Messages.Technology.class, (m, l) -> {
 						m.emisPerEnergyMsg = emisPerEnergyStep;
 						m.energyPerGdpMsg = energyPerGdpStep;
 					});
 		
-		else if (getGlobals().unitGHGShare == 2)
+		else if (getGlobals().techShareOpt == 2)
 			getLinks(Links.G20Link.class).send(
 					Messages.Technology.class, (m, l) -> {
 						m.emisPerEnergyMsg = emisPerEnergyStep;
 						m.energyPerGdpMsg = energyPerGdpStep;
 					});
 		
-		else if (getGlobals().unitGHGShare == 3)
+		else if (getGlobals().techShareOpt == 3)
 			getLinks(Links.InterLink.class).send(
 					Messages.Technology.class, (m, l) -> {
 						m.emisPerEnergyMsg = emisPerEnergyStep;
@@ -273,6 +290,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		Collections.sort(energyPerGdpList);
 		// Get expected technology level after the evolution period
 		// and set corresponding values
+		// Target value is the minimal one which is better than the expected self-developmemt result
+		
 		long currTick = getContext().getTick();
 		if (currTick - emisPerEnergyLU > techEvolvePeriod) {
 			double emisPerEnergyExpect = Math.pow(2, Math.log(emisPerEnergyStep) / Math.log(2)
@@ -286,6 +305,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 					emisPerEnergyLU = getContext().getTick();
 					emisPerEnergyLU = currTick;
 					emisPerEnergyRef = emisPerEnergyStep;
+					emisPerEnergyInProgress = true;
+					getLongAccumulator("emisPerEnergyAccu").add(1L);
 					break;
 				}
 			}
@@ -301,47 +322,49 @@ public class Country extends Agent<ClimateKaya.Globals> {
 							/ (Math.log(2) * techEvolvePeriod);
 					energyPerGdpLU = currTick;
 					energyPerGdpRef = energyPerGdpStep;
+					energyPerGdpInProgress = true;
+					getLongAccumulator("energyPerGdpAccu").add(1L);
 					break;
 				}
 			}
 		}
 		
 	}
-	
-	
-	static Action<Country> shareGHG = action(Country::shareUnitGHG);
-	static Action<Country> improveGHG = action(Country::improveUnitGHG);
-	
-	
-	void improveUnitGHG() {
-		if (hasMessageOfType(Messages.unitGHG.class)) {
-			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
-			List<Double> doubleList = new ArrayList<>();
-			list.forEach(msg -> doubleList.add(msg.getBody()));
-			
-			Collections.sort(doubleList);
-			if (doubleList.get(0) >= unitGHG) return;
-			
-			for (int i = 1; i < doubleList.size(); i++) {
-				if (doubleList.get(i) >= unitGHG && doubleList.get(i - 1) < unitGHG) {
-					unitGHG = doubleList.get(i - 1);
-					return;
-				}
-			}
-		}
-	}
-	
-	
-	void shareUnitGHG() {
-		unitGHG *= getGlobals().techImprove;
-		
-		if (getGlobals().unitGHGShare == 1)
-			getLinks(Links.G7Link.class).send(Messages.unitGHG.class, unitGHG);
-		if (getGlobals().unitGHGShare == 2)
-			getLinks(Links.G20Link.class).send(Messages.unitGHG.class, unitGHG);
-		if (getGlobals().unitGHGShare == 3)
-			getLinks(Links.InterLink.class).send(Messages.unitGHG.class, unitGHG);
-	}
+
+
+//	static Action<Country> shareGHG = action(Country::shareUnitGHG);
+//	static Action<Country> improveGHG = action(Country::improveUnitGHG);
+
+
+//	void improveUnitGHG() {
+//		if (hasMessageOfType(Messages.unitGHG.class)) {
+//			List<Messages.unitGHG> list = getMessagesOfType(Messages.unitGHG.class);
+//			List<Double> doubleList = new ArrayList<>();
+//			list.forEach(msg -> doubleList.add(msg.getBody()));
+//
+//			Collections.sort(doubleList);
+//			if (doubleList.get(0) >= unitGHG) return;
+//
+//			for (int i = 1; i < doubleList.size(); i++) {
+//				if (doubleList.get(i) >= unitGHG && doubleList.get(i - 1) < unitGHG) {
+//					unitGHG = doubleList.get(i - 1);
+//					return;
+//				}
+//			}
+//		}
+//	}
+
+
+//	void shareUnitGHG() {
+//		unitGHG *= getGlobals().techImprove;
+//
+//		if (getGlobals().techShareOpt == 1)
+//			getLinks(Links.G7Link.class).send(Messages.unitGHG.class, unitGHG);
+//		if (getGlobals().techShareOpt == 2)
+//			getLinks(Links.G20Link.class).send(Messages.unitGHG.class, unitGHG);
+//		if (getGlobals().techShareOpt == 3)
+//			getLinks(Links.InterLink.class).send(Messages.unitGHG.class, unitGHG);
+//	}
 	
 }
 

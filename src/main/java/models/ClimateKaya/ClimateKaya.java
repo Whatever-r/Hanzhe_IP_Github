@@ -28,10 +28,10 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
 		public double avgTempStep = 0.1;
-		@Constant(name = "Tech Improve")
-		public double techImprove = 1;
+//		@Constant(name = "Tech Improve")
+//		public double techImprove = 1;
 		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
-		public int unitGHGShare = 0;
+		public int techShareOpt = 1;
 		@Variable(name = "D2D Variation of Temperature")
 		public double varTemp = 1.5;
 		//Polulation Projection HashMap
@@ -47,10 +47,12 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(27833931834.0);
-		
 		createDoubleAccumulator("SolarPrice", "Solar Price W/US$2019");
 		getDoubleAccumulator("SolarPrice").add(0.37725);
-		
+		createLongAccumulator("energyPerGdpAccu", "Count of Energy Per GDP Adoption");
+		createLongAccumulator("energyPerGdpFin", "Count of Energy Per GDP - Finish");
+		createLongAccumulator("emisPerEnergyAccu", "Count of Emission Per Energy Adoption");
+		createLongAccumulator("emisPerEnergyFin", "Count of Emission Per Energy - Finish");
 		registerAgentTypes(Country.class, UN.class, SolarPV.class);
 		registerLinkTypes(Links.UNLink.class,
 				Links.InterLink.class,
@@ -95,7 +97,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
 		run(Country.GdpGrowth, UN.UpdateStat);
-		run(Country.shareGHG, Country.improveGHG);
+//		run(Country.shareGHG, Country.improveGHG);
 		run(Country.SendTech, Country.ImproveTech);
 		run(SolarPV.updatePrice);
 		getGlobals().avgTemp += getGlobals().avgTempStep;
