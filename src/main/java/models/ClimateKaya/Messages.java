@@ -15,7 +15,6 @@ public class Messages {
 	public static class Technology extends Message{
 		double energyPerGdpMsg;
 		double emisPerEnergyMsg;
-		
 	}
 	
 	public static class isGroupMem extends Message {

@@ -6,7 +6,8 @@ public class Links {
 	public static class UNLink extends Link.Empty {
 	}
 	
-	public static class INTLLink extends Link.Empty{}
+	public static class INTLLink extends Link.Empty {
+	}
 	
 	public static class G7Link extends Link.Empty {
 	}
@@ -16,6 +17,4 @@ public class Links {
 	
 	public static class OECDLink extends Link.Empty {
 	}
-	
-	
 }

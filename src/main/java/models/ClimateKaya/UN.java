@@ -7,7 +7,7 @@ import simudyne.core.functions.SerializableConsumer;
 import java.util.List;
 
 public class UN extends Agent<ClimateKaya.Globals> {
-	
+	// Update statistics
 	static Action<UN> UpdateStat =
 			action(
 					un -> {

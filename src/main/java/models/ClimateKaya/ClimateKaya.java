@@ -27,12 +27,12 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		@Variable(name = "Average Global Temperature")
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
-		public double avgTempStep = 0.1;
-		@Constant(name = "Share Tech, 0-N 1-G7 2-G20 3-ITNL")
+		public double avgTempStep = 0.02;
+		@Constant(name = "Share Tech 0-N 1-G7 2-G20 3-ITNL")
 		public int techShareOpt;
 		@Constant(name = "Share GDP pp")
 		public boolean gdpShareOpt;
-		//Polulation Projection HashMap
+		//Population Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}
 	
@@ -53,7 +53,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		createLongAccumulator("emisPerEnergyFin", "Count of Emission Per Energy - Finish");
 		createLongAccumulator("gdpPerCapitaAccu", "Count of GDP Per Capita Adoption");
 		createLongAccumulator("gdpPerCapitaFin", "Count of GDP Per Capita - Finish");
-		registerAgentTypes(Country.class, UN.class, SolarPV.class);
+		registerAgentTypes(Country.class, UN.class);
 		registerLinkTypes(Links.UNLink.class,
 				Links.INTLLink.class,
 				Links.G7Link.class,
@@ -74,6 +74,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 					country.gdpPerCapitaStep = country.gdpPerCapitaRef;
 					country.emisPerEnergyStep = country.emisPerEnergyRef;
 					country.energyPerGdpStep = country.energyPerGdpRef;
+					country.initEvoStart();
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
 				}
 		);
@@ -96,7 +97,9 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		run(Country.GdpGrowth, UN.UpdateStat);
 		run(Country.SendGDP, Country.ImproveGDP);
 		run(Country.SendTech, Country.ImproveTech);
-		getGlobals().avgTemp += getGlobals().avgTempStep;
+		//Randomized global warming step with expected 1.6C warming in 80 years
+		double tempStep = getContext().getPrng().normal(getGlobals().avgTempStep, 0.01).sample();
+		getGlobals().avgTemp += tempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
 	
