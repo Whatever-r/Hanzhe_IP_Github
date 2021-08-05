@@ -20,18 +20,20 @@ import java.util.HashMap;
 @ModelSettings(macroStep = 1L, start = "2020-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 80L)
 public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	
-	@Constant
+//	@Constant
 	public int nbUN = 1;
 	
 	public static final class Globals extends GlobalState {
 		@Variable(name = "Average Global Temperature")
 		public double avgTemp = 15.64;
 		@Constant(name = "Average Global Warming Step")
-		public double avgTempStep = 0.02;
+		public double avgTempStep = 0.025;
 		@Constant(name = "Share Tech 0-N 1-G7 2-G20 3-ITNL")
 		public int techShareOpt;
 		@Constant(name = "Share GDP pp")
 		public boolean gdpShareOpt;
+		@Constant(name = "Tech Evolve")
+		public boolean techBoolean = true;
 		//Population Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
 	}
@@ -95,10 +97,10 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 //		Within each step, Country receives Temoerature data,
 //		Produce GDP growth incl. the temperature impact
 		run(Country.GdpGrowth, UN.UpdateStat);
-		run(Country.SendGDP, Country.ImproveGDP);
-		run(Country.SendTech, Country.ImproveTech);
-		//Randomized global warming step with expected 1.6C warming in 80 years
-		double tempStep = getContext().getPrng().normal(getGlobals().avgTempStep, 0.01).sample();
+		run(Country.ShareGdpPerCapita, Country.ImproveGdpPerCapita);
+		run(Country.ShareTech, Country.ImproveTech);
+		//Randomized global warming step with expected 2 C warming in 80 years
+		double tempStep = getContext().getPrng().normal(getGlobals().avgTempStep, 0.025).sample();
 		getGlobals().avgTemp += tempStep;
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 	}
