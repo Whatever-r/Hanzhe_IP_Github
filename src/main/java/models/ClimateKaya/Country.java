@@ -34,6 +34,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		epgStart = getStart(techEvolvePeriod);
 		epgPoss = getPoss(techEvolvePeriod);
 		epgStartTick = getPrng().enumeratedInteger(epgStart, epgPoss).sample();
+		epeStart = getStart(techEvolvePeriod);
+		epePoss = getPoss(techEvolvePeriod);
+		epeStartTick = getPrng().enumeratedInteger(epgStart, epgPoss).sample();
 	}
 	
 	double[] getPoss(long period) {
