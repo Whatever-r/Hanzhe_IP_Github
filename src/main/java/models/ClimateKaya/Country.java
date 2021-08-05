@@ -242,6 +242,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	//kWh per USD
 	void getEnergyPerGdp() {
+		if (!getGlobals().techBoolean) {
+			return;
+		}
 		long currYear = getContext().getTick();
 		double tau = currYear - energyPerGdpLU;
 		// Improve the parameter aiming to achieve the target value at the end of period
@@ -259,7 +262,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		} else {
 			double Astar = tau + (tau * tau) / energyPerGdpCount;
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpMu;
-			
 			double stdevSquare = Math.max(0.000001, energyPerGdpK2 * Astar);
 			double exp = getPrng().normal(avg, Math.sqrt(stdevSquare)).sample();
 			this.energyPerGdpStep = Math.pow(2, exp);
@@ -268,6 +270,9 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	//	tCO2e per Trillion Wh
 	void getEmisPerEnergy() {
+		if (!getGlobals().techBoolean) {
+			return;
+		}
 		long currYear = getContext().getTick();
 		double tau = currYear - emisPerEnergyLU;
 //		if is in technology adoption period
@@ -295,10 +300,10 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	/**
 	 * Share & Improve GDP per Capita
 	 */
-	static Action<Country> SendGDP = action(Country::SendGDP);
-	static Action<Country> ImproveGDP = action(Country::ImproveGDP);
+	static Action<Country> ShareGdpPerCapita = action(Country::ShareGdpPerCapita);
+	static Action<Country> ImproveGdpPerCapita = action(Country::ImproveGdpPerCapita);
 	
-	void SendGDP() {
+	void ShareGdpPerCapita() {
 		long currTick = getContext().getTick();
 		if (!getGlobals().gdpShareOpt)
 			return;
@@ -312,8 +317,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 			getLinks(Links.INTLLink.class).send(Messages.GdpPerCapitaMsg.class, gdpPerCapitaStep);
 	}
 	
-	void ImproveGDP() {
-		if (hasMessageOfType(Messages.GdpPerCapitaMsg.class)) {
+	void ImproveGdpPerCapita() {
+		if (!gdpPerCapitaInProgress && hasMessageOfType(Messages.GdpPerCapitaMsg.class)) {
 //		Read & Sort
 			List<Messages.GdpPerCapitaMsg> gdpMsgList = getMessagesOfType(Messages.GdpPerCapitaMsg.class);
 			List<Double> gdpPerCapitaList = new ArrayList<>();
@@ -346,11 +351,13 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	/**
 	 * Share & Improve Technology
 	 */
-	static Action<Country> SendTech = action(Country::SendTech);
+	static Action<Country> ShareTech = action(Country::ShareTech);
 	static Action<Country> ImproveTech = action(Country::ImproveTech);
 	
 	//Share EmisPerEnergy & EnergyPerGDP to other countries
-	void SendTech() {
+	void ShareTech() {
+		if (!getGlobals().techBoolean)
+			return;
 		if (getGlobals().techShareOpt == 1)
 			getLinks(Links.G7Link.class).send(
 					Messages.Technology.class, (m, l) -> {
@@ -390,7 +397,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 			// Target value is the minimal one which is better than the
 			// expected self-developmemt result after the period
 			long currTick = getContext().getTick();
-			if (currTick == epgStartTick || currTick - emisPerEnergyLU > techEvolvePeriod) {
+			if (!emisPerEnergyInProgress &&
+					(currTick == epeStartTick || currTick - emisPerEnergyLU > techEvolvePeriod)) {
 				double emisPerEnergyExpect = Math.pow(2, Math.log(emisPerEnergyStep) / Math.log(2)
 						+ techEvolvePeriod * emisPerEnergyMu);
 				emisPerEnergyTarget = emisPerEnergyExpect;
@@ -409,7 +417,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 					}
 				}
 			}
-			if (currTick == epgStartTick || currTick - energyPerGdpLU > techEvolvePeriod) {
+			if (!energyPerGdpInProgress &&
+					(currTick == epgStartTick || currTick - energyPerGdpLU > techEvolvePeriod)) {
 				double energyPerGdpExpect = Math.pow(2, Math.log(energyPerGdpStep) / Math.log(2)
 						+ techEvolvePeriod * energyPerGdpMu);
 				energyPerGdpTarget = energyPerGdpExpect;
