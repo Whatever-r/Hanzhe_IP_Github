@@ -47,7 +47,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
-		getDoubleAccumulator("globalGHGAccu").add(27833931834.0);
+		getDoubleAccumulator("globalGHGAccu").add(29141482806.0);
 		// Count no. of technology & GDP adoption
 		createLongAccumulator("energyPerGdpAccu", "Count of Energy Per GDP Adoption");
 		createLongAccumulator("energyPerGdpFin", "Count of Energy Per GDP - Finish");
