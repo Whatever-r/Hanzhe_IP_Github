@@ -15,8 +15,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	// At most 1x GDP adoption for every 5 year
 	long gdpEvolvePeriod = 5;
 	// Even possibility to initiate 1st adoption
-	//TODO: there is a bit of unnecessary casting happening here, you can declare the above variable as an int -
-	// same goes for the variables below
 	int[] gdpStart = new int[(int) gdpEvolvePeriod];
 	double[] gdpPoss = new double[(int) gdpEvolvePeriod];
 	int gdpStartTick;
@@ -67,7 +65,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	@Constant(name = "OECD Member")
 	boolean OECD;
 
-	//TODO you can drop the 'initializable = true'
 	@Variable(initializable = true, name = "Average Annual Temp by Country")
 	double avgAnnuTemp;
 	@Constant(name = "Ratio of Local Temp Growth to Global Avg.")

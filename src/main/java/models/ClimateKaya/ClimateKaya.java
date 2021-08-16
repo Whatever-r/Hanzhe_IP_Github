@@ -36,6 +36,8 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		public boolean techBoolean = true;
 		//Population Projection HashMap
 		public HashMap<String, HashMap<Long, Long>> populationHash = null;
+
+
 	}
 	
 	
@@ -45,8 +47,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		createDoubleAccumulator("avgGlobalTempAccu", "Average Global Temperature");
 		getDoubleAccumulator("avgGlobalTempAccu").add(getGlobals().avgTemp);
 		createDoubleAccumulator("globalGDPAccu", "Global GDP");
-
-		//TODO: these values could be saved in the GlobalState and exposed as inputs to the console
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(29141482806.0);
@@ -83,7 +83,6 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 				}
 		);
 
-		//TODO: use the Load connections and create a CSV of the TO and From connections
 		countryGroup.partitionConnected(unGroup, Links.UNLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.INTLLink.class);
 		countryGroup.fullyConnected(countryGroup, Links.G7Link.class);
