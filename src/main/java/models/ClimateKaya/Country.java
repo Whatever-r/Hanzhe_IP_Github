@@ -12,14 +12,14 @@ import java.util.Collections;
 import java.util.List;
 
 public class Country extends Agent<ClimateKaya.Globals> {
-	// At most 1x GDP adoption for every 5 year
-	long gdpEvolvePeriod = 5;
+	// At most 1x GDP adoption for every 10 year
+	long gdpEvolvePeriod = 10;
 	// Even possibility to initiate 1st adoption
 	int[] gdpStart = new int[(int) gdpEvolvePeriod];
 	double[] gdpPoss = new double[(int) gdpEvolvePeriod];
 	int gdpStartTick;
-	// At most 1x tech adoption for every 3 year
-	long techEvolvePeriod = 3;
+	// At most 1x tech adoption for every 5 year
+	long techEvolvePeriod = 5;
 	int[] epgStart = new int[(int) techEvolvePeriod];
 	double[] epgPoss = new double[(int) techEvolvePeriod];
 	int epgStartTick;
@@ -27,7 +27,8 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double[] epePoss = new double[(int) techEvolvePeriod];
 	int epeStartTick;
 	
-	void initEvoStart() {
+	//	initiate a random 1st tech adoption
+	void initAdoptStart() {
 		gdpStart = getStart(gdpEvolvePeriod);
 		gdpPoss = getPoss(gdpEvolvePeriod);
 		gdpStartTick = getPrng().enumeratedInteger(gdpStart, gdpPoss).sample();
@@ -52,7 +53,6 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		return ret;
 	}
 	
-	;
 	
 	@Constant(name = "C/R Code")
 	String code;
@@ -71,6 +71,10 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	double tempStepRatio;
 	@Variable(initializable = true, name = "GDP by Country USD")
 	double gdp;
+	@Variable(name = "Energy by Country TWh")
+	double energy;
+	@Variable(name = "Emission by Country tCO2e")
+	double emission;
 	@Variable(initializable = true, name = "Population")
 	double population;
 	/**
@@ -170,10 +174,17 @@ public class Country extends Agent<ClimateKaya.Globals> {
 						country.UpdateStepVar();
 //						calc GDP w/o Marginal Loss
 						country.KayaGdp();
-//						calc & send Emission
-						country.SendGHGToUN(country.calcEmission());
+//						calc & send Energy & Emission
+						country.calcEmission();
+						country.SendGHGToUN(country.emission);
+						country.SendEnergyToUN(country.energy);
 //						calc Lossed GDP & Send
 						country.SendGDPToUN(country.MarginalGdpLossCoeff());
+						//sample by-country accumulator with Inida Energy & Emission
+						if (country.code.equals("IND")) {
+							country.getDoubleAccumulator("indiaGHGAccu").add(country.emission);
+							country.getDoubleAccumulator("indiaEnergyAccu").add(country.energy);
+						}
 					}
 			);
 	
@@ -183,6 +194,10 @@ public class Country extends Agent<ClimateKaya.Globals> {
 	
 	void SendGHGToUN(double emission) {
 		getLinks(Links.UNLink.class).send(Messages.GhgEmission.class, emission);
+	}
+	
+	void SendEnergyToUN(double energy) {
+		getLinks(Links.UNLink.class).send(Messages.EnergyMsg.class, energy);
 	}
 	
 	void UpdateAvgTemp() {
@@ -208,13 +223,14 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		long year = getContext().getTick();
 		population = getGlobals().populationHash.get(code).get(year);
 		this.gdp = this.gdpPerCapitaStep * population;
+		this.calcEmission();
 	}
 	
-	double calcEmission() {
-		//                 USD * kWh per USD / 10ˆ9 to Trillion Wh
-		double energyTWh = gdp * energyPerGdpStep / Math.pow(10, 9);
-		//   Trillion Wh * tCO2e per TWh
-		return energyTWh * emisPerEnergyStep;
+	void calcEmission() {
+		//Trillion Wh = USD * kWh per USD / 10ˆ9
+		this.energy = (gdp * energyPerGdpStep) / Math.pow(10, 9);
+		//      tCO2e = Trillion Wh * tCO2e per TWh
+		this.emission = energy * emisPerEnergyStep;
 	}
 	
 	//USD per capita
@@ -224,7 +240,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 //		if is in progress of adopting from other country
 		if (gdpPerCapitaInProgress && tau <= gdpEvolvePeriod) {
 			double avg = Math.log(gdpPerCapitaRef) / Math.log(2) + tau * gdpPerCapitaEvoCoeff;
-			double stdev = Math.max(0.000001, gdpPerCapitaEvoCoeff / 50);
+			double stdev = Math.max(0.000001, gdpPerCapitaEvoCoeff / 20);
 			double exp = getPrng().normal(avg, stdev).sample();
 			this.gdpPerCapitaStep = Math.pow(2, exp);
 			//at the end of adoption, update the ref value
@@ -253,7 +269,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 		// Improve the parameter aiming to achieve the target value at the end of period
 		if (energyPerGdpInProgress && tau <= techEvolvePeriod) {
 			double avg = Math.log(energyPerGdpRef) / Math.log(2) + tau * energyPerGdpAdoptCoeff;
-			double stdev = Math.max(0.000001, energyPerGdpAdoptCoeff / 50);
+			double stdev = Math.max(0.000001, energyPerGdpAdoptCoeff / 20);
 			double exp = getPrng().normal(avg, stdev).sample();
 			this.energyPerGdpStep = Math.pow(2, exp);
 //			at the end of adoption, update the ref value
@@ -281,7 +297,7 @@ public class Country extends Agent<ClimateKaya.Globals> {
 //		if is in technology adoption period
 		if (emisPerEnergyInProgress && tau <= techEvolvePeriod) {
 			double avg = Math.log(emisPerEnergyRef) / Math.log(2) + tau * emisPerEnergyAdoptCoeff;
-			double stdev = Math.max(0.000001, emisPerEnergyAdoptCoeff / 50);
+			double stdev = Math.max(0.000001, emisPerEnergyAdoptCoeff / 20);
 			double exp = getPrng().normal(avg, stdev).sample();
 			this.emisPerEnergyStep = Math.pow(2, exp);
 //			at the end of adoption, update the ref value

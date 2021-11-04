@@ -15,12 +15,11 @@ import java.io.FileReader;
 import java.util.HashMap;
 
 
-//each marcoStep = 3 * timeStep = 3 MONTHS
 @SuppressWarnings("CommentedOutCode")
 @ModelSettings(macroStep = 1L, start = "2020-06-01T00:00:00Z", timeStep = 1L, timeUnit = "YEARS", ticks = 80L)
 public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 	
-//	@Constant
+	//	@Constant
 	public int nbUN = 1;
 	
 	public static final class Globals extends GlobalState {
@@ -48,6 +47,14 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 		getDoubleAccumulator("globalGDPAccu").add(76139917568890.90);
 		createDoubleAccumulator("globalGHGAccu", "Global GHG");
 		getDoubleAccumulator("globalGHGAccu").add(29141482806.0);
+		createDoubleAccumulator("globalEnergyAccu", "Global Energy");
+		getDoubleAccumulator("globalEnergyAccu").add(133989.83);
+		//sample by-country accumulator with Inida Energy & Emission
+		createDoubleAccumulator("indiaGHGAccu", "India Energy");
+		getDoubleAccumulator("indiaGHGAccu").add((2868929415617.02 * 3.29774) / Math.pow(10, 9) * 276551.4475);
+		createDoubleAccumulator("indiaEnergyAccu", "India Energy");
+		getDoubleAccumulator("indiaEnergyAccu").add((2868929415617.02 * 3.29774) / Math.pow(10, 9));
+		
 		// Count no. of technology & GDP adoption
 		createLongAccumulator("energyPerGdpAccu", "Count of Energy Per GDP Adoption");
 		createLongAccumulator("energyPerGdpFin", "Count of Energy Per GDP - Finish");
@@ -76,7 +83,7 @@ public class ClimateKaya extends AgentBasedModel<ClimateKaya.Globals> {
 					country.gdpPerCapitaStep = country.gdpPerCapitaRef;
 					country.emisPerEnergyStep = country.emisPerEnergyRef;
 					country.energyPerGdpStep = country.energyPerGdpRef;
-					country.initEvoStart();
+					country.initAdoptStart();
 					println(country.code + "\t" + getGlobals().populationHash.get(country.code).get(0L));
 				}
 		);

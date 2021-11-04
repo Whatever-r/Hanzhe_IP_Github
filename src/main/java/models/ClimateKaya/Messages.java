@@ -6,6 +6,9 @@ public class Messages {
 	public static class GdpValue extends Message.Double {
 	}
 	
+	public static class EnergyMsg extends Message.Double {
+	}
+	
 	public static class GhgEmission extends Message.Double {
 	}
 	

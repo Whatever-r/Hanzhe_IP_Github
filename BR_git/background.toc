@@ -1,8 +1,0 @@
-\babel@toc {english}{}
-\contentsline {chapter}{\numberline {1}Introduction}{1}{chapter.2}%
-\contentsline {chapter}{\numberline {2}Literature Review}{2}{chapter.3}%
-\contentsline {section}{\numberline {2.1}Agent Based Modelling approach}{2}{section.4}%
-\contentsline {section}{\numberline {2.2}Apply ABM on Climate Issue}{3}{section.8}%
-\contentsline {section}{\numberline {2.3}Macroscopic Research}{5}{section.11}%
-\contentsline {chapter}{\numberline {3}Technical Progress}{7}{chapter.13}%
-\contentsline {chapter}{\numberline {4}Further Plan}{9}{chapter.15}%

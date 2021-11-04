@@ -13,11 +13,13 @@ public class UN extends Agent<ClimateKaya.Globals> {
 					un -> {
 						un.updateGlobalGDP();
 						un.updateGlobalGHG();
+						un.updateGlobalEnergy();
 						un.updateAccumulator();
 					}
 			);
 	
 	public double globalGDP = 0;
+	public double globalEnergy = 0;
 	public double globalGHG = 0;
 	
 	private static Action<UN> action(SerializableConsumer<UN> consumer) {
@@ -31,9 +33,7 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	
 	void calcGlobalGDP(List<Messages.GdpValue> gdpValueList) {
 		this.globalGDP = 0;
-		gdpValueList.forEach(
-				gdpValue -> this.globalGDP += gdpValue.getBody()
-		);
+		gdpValueList.forEach(gdpValue -> this.globalGDP += gdpValue.getBody());
 	}
 	
 	void updateGlobalGHG() {
@@ -43,13 +43,22 @@ public class UN extends Agent<ClimateKaya.Globals> {
 	
 	void calcGlobalGHG(List<Messages.GhgEmission> ghgEmissionList) {
 		this.globalGHG = 0;
-		ghgEmissionList.forEach(
-				ghgEmission -> this.globalGHG += ghgEmission.getBody()
-		);
+		ghgEmissionList.forEach(ghgEmission -> this.globalGHG += ghgEmission.getBody());
+	}
+	
+	void updateGlobalEnergy() {
+		List<Messages.EnergyMsg> EnergyList = getMessagesOfType(Messages.EnergyMsg.class);
+		calcGlobalEnergy(EnergyList);
+	}
+	
+	void calcGlobalEnergy(List<Messages.EnergyMsg> EnergyList) {
+		this.globalEnergy = 0;
+		EnergyList.forEach(ghgEmission -> this.globalEnergy += ghgEmission.getBody());
 	}
 	
 	void updateAccumulator() {
 		getDoubleAccumulator("globalGDPAccu").add(this.globalGDP);
 		getDoubleAccumulator("globalGHGAccu").add(this.globalGHG);
+		getDoubleAccumulator("globalEnergyAccu").add(this.globalEnergy);
 	}
 }
